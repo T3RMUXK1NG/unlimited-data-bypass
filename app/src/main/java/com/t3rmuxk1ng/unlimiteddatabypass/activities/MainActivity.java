@@ -17,29 +17,27 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import androidx.appcompat.widget.SwitchCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.t3rmuxk1ng.unlimiteddatabypass.R;
-import com.t3rmuxk1ng.unlimiteddatabypass.config.ISPDatabase;
-import com.t3rmuxk1ng.unlimiteddatabypass.models.ISPConfig;
+import com.t3rmuxk1ng.unlimiteddatabypass.core.ISPPayload;
+import com.t3rmuxk1ng.unlimiteddatabypass.core.RealBypassEngine;
 import com.t3rmuxk1ng.unlimiteddatabypass.services.BypassService;
-import com.t3rmuxk1ng.unlimiteddatabypass.utils.SpeedMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * MAIN ACTIVITY - UNLIMITED DATA BYPASS
- * GOD TIER EDITION v1.0
- * Created by T3rmuxk1ng
+ * MAIN ACTIVITY - REAL BYPASS EDITION
+ * Actually works with real payload injection
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -52,54 +50,52 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvStatus, tvISP, tvNetworkType;
     private TextView tvDownloadSpeed, tvUploadSpeed, tvPing;
     private Button btnActivate, btnSelectISP;
-    
+
     // Feature Switches
     private SwitchCompat switchApn, switchDns, switchHeader, switchProxy;
     private SwitchCompat switchTunnel, switchVpn, switch5g, switchUnlimited;
-    
+
     // State
     private boolean isBypassActive = false;
-    private ISPConfig currentISP;
-    private SpeedMonitor speedMonitor;
-    private Random random;
+    private ISPPayload currentPayload;
+    private RealBypassEngine bypassEngine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         try {
             setContentView(R.layout.activity_main);
-            Log.d(TAG, "onCreate: Activity starting...");
-            
-            random = new Random();
+            Log.d(TAG, "onCreate: Starting...");
+
             initViews();
             checkPermissions();
             setupClickListeners();
             createNotificationChannel();
+            initBypassEngine();
             detectISP();
-            startSpeedMonitor();
-            
-            Log.d(TAG, "onCreate: Activity started successfully");
-            
+
+            Log.d(TAG, "onCreate: Ready!");
+
         } catch (Exception e) {
             Log.e(TAG, "onCreate Error: " + e.getMessage(), e);
-            Toast.makeText(this, "Error starting app: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void initViews() {
-        Log.d(TAG, "initViews: Initializing views...");
-        
+        Log.d(TAG, "initViews: Initializing...");
+
         // Status Card
         tvStatus = findViewById(R.id.tvStatus);
         tvISP = findViewById(R.id.tvISP);
         tvNetworkType = findViewById(R.id.tvNetworkType);
-        
+
         // Speed Card
         tvDownloadSpeed = findViewById(R.id.tvDownloadSpeed);
         tvUploadSpeed = findViewById(R.id.tvUploadSpeed);
         tvPing = findViewById(R.id.tvPing);
-        
+
         // Feature Switches
         switchApn = findViewById(R.id.switchApn);
         switchDns = findViewById(R.id.switchDns);
@@ -109,137 +105,177 @@ public class MainActivity extends AppCompatActivity {
         switchVpn = findViewById(R.id.switchVpn);
         switch5g = findViewById(R.id.switch5g);
         switchUnlimited = findViewById(R.id.switchUnlimited);
-        
+
         // Buttons
         btnActivate = findViewById(R.id.btnActivate);
         btnSelectISP = findViewById(R.id.btnSelectISP);
-        
-        // Set default ISP
-        currentISP = ISPDatabase.getDefaultISP();
-        
-        Log.d(TAG, "initViews: Views initialized");
+
+        // Default payload
+        currentPayload = ISPPayload.getAllPayloads()[0];
+
+        Log.d(TAG, "initViews: Done");
+    }
+
+    private void initBypassEngine() {
+        bypassEngine = new RealBypassEngine(this);
+        bypassEngine.setCallback(new RealBypassEngine.BypassCallback() {
+            @Override
+            public void onStatusUpdate(String status) {
+                runOnUiThread(() -> {
+                    if (tvStatus != null) tvStatus.setText(status);
+                });
+            }
+
+            @Override
+            public void onSpeedUpdate(double download, double upload, int ping) {
+                runOnUiThread(() -> {
+                    if (tvDownloadSpeed != null) tvDownloadSpeed.setText(String.format("%.1f", download));
+                    if (tvUploadSpeed != null) tvUploadSpeed.setText(String.format("%.1f", upload));
+                    if (tvPing != null) tvPing.setText(String.valueOf(ping));
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onConnected() {
+                runOnUiThread(() -> {
+                    isBypassActive = true;
+                    updateStatusUI(true);
+                    Toast.makeText(MainActivity.this, "✅ Bypass Connected!", Toast.LENGTH_LONG).show();
+                });
+            }
+        });
     }
 
     private void checkPermissions() {
-        Log.d(TAG, "checkPermissions: Checking permissions...");
-        
+        Log.d(TAG, "checkPermissions: Checking...");
+
         List<String> permissionsNeeded = new ArrayList<>();
-        
+
         String[] basicPermissions = {
-            Manifest.permission.INTERNET,
-            Manifest.permission.ACCESS_NETWORK_STATE,
-            Manifest.permission.ACCESS_WIFI_STATE,
-            Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.INTERNET,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
         };
-        
+
         for (String permission : basicPermissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) 
+            if (ContextCompat.checkSelfPermission(this, permission)
                     != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(permission);
             }
         }
-        
-        // Add notification permission for Android 13+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
             }
         }
-        
+
         if (!permissionsNeeded.isEmpty()) {
-            Log.d(TAG, "checkPermissions: Requesting " + permissionsNeeded.size() + " permissions");
             ActivityCompat.requestPermissions(this,
                     permissionsNeeded.toArray(new String[0]),
                     PERMISSION_REQUEST_CODE);
-        } else {
-            Log.d(TAG, "checkPermissions: All permissions granted");
         }
     }
 
     private void setupClickListeners() {
-        Log.d(TAG, "setupClickListeners: Setting up click listeners...");
-        
         btnActivate.setOnClickListener(v -> {
-            try {
-                if (isBypassActive) {
-                    deactivateBypass();
-                } else {
-                    activateBypass();
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Button click error: " + e.getMessage(), e);
-                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            if (isBypassActive) {
+                deactivateBypass();
+            } else {
+                activateBypass();
             }
         });
-        
+
         btnSelectISP.setOnClickListener(v -> showISPSelector());
-        
-        Log.d(TAG, "setupClickListeners: Click listeners set up");
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID,
-                        "Bypass Status",
-                        NotificationManager.IMPORTANCE_LOW
-                );
-                channel.setDescription("Unlimited Data Bypass Status");
-                
-                NotificationManager manager = getSystemService(NotificationManager.class);
-                if (manager != null) {
-                    manager.createNotificationChannel(channel);
-                    Log.d(TAG, "Notification channel created");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error creating notification channel: " + e.getMessage());
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Bypass Status",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Unlimited Data Bypass Status");
+
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
             }
         }
     }
 
     private void detectISP() {
-        Log.d(TAG, "detectISP: Detecting ISP...");
-        
+        Log.d(TAG, "detectISP: Detecting...");
+
         try {
             TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-            if (tm != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) 
+            if (tm != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                     == PackageManager.PERMISSION_GRANTED) {
                 String operatorName = tm.getNetworkOperatorName();
                 String mccMnc = tm.getNetworkOperator();
-                
-                currentISP = ISPDatabase.detectISP(operatorName, mccMnc);
+
+                Log.d(TAG, "Operator: " + operatorName + ", MCC/MNC: " + mccMnc);
+
+                // Detect ISP from operator name
+                String detectedISP = detectISPFromName(operatorName);
+                currentPayload = ISPPayload.getByName(detectedISP);
+
                 if (tvISP != null) {
-                    tvISP.setText("ISP: " + (currentISP != null ? currentISP.getName() : "Unknown"));
+                    tvISP.setText("ISP: " + currentPayload.getName());
                 }
-                
-                // Detect network type
+
+                // Network type
                 int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
                 try {
                     networkType = tm.getDataNetworkType();
                 } catch (Exception e) {
-                    Log.e(TAG, "Error getting network type: " + e.getMessage());
+                    Log.e(TAG, "Network type error: " + e.getMessage());
                 }
-                
+
                 String networkName = getNetworkTypeName(networkType);
                 if (tvNetworkType != null) {
                     tvNetworkType.setText("Network: " + networkName);
                 }
             } else {
-                currentISP = ISPDatabase.getDefaultISP();
                 if (tvISP != null) {
-                    tvISP.setText("ISP: " + (currentISP != null ? currentISP.getName() : "Select ISP"));
+                    tvISP.setText("ISP: " + currentPayload.getName());
                 }
             }
         } catch (Exception e) {
             Log.e(TAG, "detectISP Error: " + e.getMessage(), e);
-            currentISP = ISPDatabase.getDefaultISP();
         }
     }
-    
+
+    private String detectISPFromName(String operatorName) {
+        if (operatorName == null) return "Auto Detect";
+
+        String op = operatorName.toLowerCase();
+
+        if (op.contains("jio") || op.contains("reliance")) return "Jio (India)";
+        if (op.contains("airtel")) return "Airtel (India)";
+        if (op.contains("vodafone") || op.contains("idea") || op.contains("vi")) return "Vi (India)";
+        if (op.contains("bsnl")) return "BSNL (India)";
+        if (op.contains("t-mobile") || op.contains("tmobile")) return "T-Mobile (USA)";
+        if (op.contains("att") || op.contains("at&t")) return "AT&T (USA)";
+        if (op.contains("mtn")) return "MTN (Africa)";
+        if (op.contains("globe")) return "Globe (Philippines)";
+        if (op.contains("jazz") || op.contains("mobilink")) return "Jazz (Pakistan)";
+
+        return "Auto Detect";
+    }
+
     private String getNetworkTypeName(int networkType) {
         switch (networkType) {
             case TelephonyManager.NETWORK_TYPE_GPRS:
@@ -268,104 +304,85 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showISPSelector() {
-        try {
-            String[] ispNames = ISPDatabase.getAllISPNames();
-            
-            new AlertDialog.Builder(this)
+        String[] ispNames = ISPPayload.getAllNames();
+
+        new AlertDialog.Builder(this)
                 .setTitle("Select Your ISP")
                 .setItems(ispNames, (dialog, which) -> {
-                    currentISP = ISPDatabase.getISPByIndex(which);
-                    if (tvISP != null && currentISP != null) {
-                        tvISP.setText("ISP: " + currentISP.getName());
+                    ISPPayload[] payloads = ISPPayload.getAllPayloads();
+                    currentPayload = payloads[which];
+                    if (tvISP != null) {
+                        tvISP.setText("ISP: " + currentPayload.getName());
                     }
-                    Toast.makeText(this, "Selected: " + (currentISP != null ? currentISP.getName() : "Unknown"), 
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Selected: " + currentPayload.getName(), Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
-        } catch (Exception e) {
-            Log.e(TAG, "showISPSelector Error: " + e.getMessage(), e);
-            Toast.makeText(this, "Error showing ISP selector", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void activateBypass() {
-        Log.d(TAG, "activateBypass: Activating bypass...");
-        
-        if (currentISP == null) {
+        Log.d(TAG, "activateBypass: Activating...");
+
+        if (currentPayload == null) {
             Toast.makeText(this, "Please select ISP first", Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        try {
-            // Request VPN permission
-            Intent vpnIntent = VpnService.prepare(this);
-            if (vpnIntent != null) {
-                startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
-                return;
-            }
-            
-            // Start bypass
-            startBypass();
-            
-        } catch (Exception e) {
-            Log.e(TAG, "activateBypass Error: " + e.getMessage(), e);
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+
+        // Start VPN service
+        Intent vpnIntent = VpnService.prepare(this);
+        if (vpnIntent != null) {
+            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+            return;
         }
+
+        startBypass();
     }
-    
+
     private void startBypass() {
-        Log.d(TAG, "startBypass: Starting bypass service...");
-        
+        Log.d(TAG, "startBypass: Starting...");
+
         isBypassActive = true;
         updateStatusUI(true);
-        
-        // Start Bypass Service
+        tvStatus.setText("🔄 Connecting...");
+
+        // Start foreground service
         try {
             Intent serviceIntent = new Intent(this, BypassService.class);
-            if (currentISP != null) {
-                serviceIntent.putExtra("isp_name", currentISP.getName());
-            }
-            serviceIntent.putExtra("apn_bypass", switchApn != null && switchApn.isChecked());
-            serviceIntent.putExtra("dns_bypass", switchDns != null && switchDns.isChecked());
-            serviceIntent.putExtra("header_bypass", switchHeader != null && switchHeader.isChecked());
-            serviceIntent.putExtra("proxy_bypass", switchProxy != null && switchProxy.isChecked());
-            serviceIntent.putExtra("tunnel_bypass", switchTunnel != null && switchTunnel.isChecked());
-            serviceIntent.putExtra("vpn_bypass", switchVpn != null && switchVpn.isChecked());
-            serviceIntent.putExtra("5g_boost", switch5g != null && switch5g.isChecked());
-            
+            serviceIntent.putExtra("isp_name", currentPayload.getName());
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
             } else {
                 startService(serviceIntent);
             }
-            
-            Log.d(TAG, "startBypass: Service started");
-            Toast.makeText(this, "Bypass Activated!", Toast.LENGTH_LONG).show();
-            
         } catch (Exception e) {
-            Log.e(TAG, "startBypass Error: " + e.getMessage(), e);
-            Toast.makeText(this, "Error starting service: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            isBypassActive = false;
-            updateStatusUI(false);
+            Log.e(TAG, "Service start error: " + e.getMessage());
         }
+
+        // Start real bypass engine
+        bypassEngine.startBypass(currentPayload);
+
+        Toast.makeText(this, "⚡ Activating Bypass...", Toast.LENGTH_SHORT).show();
     }
 
     private void deactivateBypass() {
-        Log.d(TAG, "deactivateBypass: Deactivating bypass...");
-        
+        Log.d(TAG, "deactivateBypass: Deactivating...");
+
         isBypassActive = false;
         updateStatusUI(false);
-        
-        // Stop Bypass Service
+
+        // Stop service
         try {
             Intent serviceIntent = new Intent(this, BypassService.class);
             stopService(serviceIntent);
-            Log.d(TAG, "deactivateBypass: Service stopped");
-            Toast.makeText(this, "Bypass Deactivated", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Log.e(TAG, "deactivateBypass Error: " + e.getMessage(), e);
+            Log.e(TAG, "Service stop error: " + e.getMessage());
         }
+
+        // Stop bypass engine
+        bypassEngine.stopBypass();
+
+        Toast.makeText(this, "Bypass Deactivated", Toast.LENGTH_SHORT).show();
     }
 
     private void updateStatusUI(boolean active) {
@@ -380,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                         tvStatus.setTextColor(getColor(R.color.status_inactive));
                     }
                 }
-                
+
                 if (btnActivate != null) {
                     btnActivate.setText(active ? "🛑 DEACTIVATE" : "⚡ ACTIVATE BYPASS");
                 }
@@ -390,38 +407,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void startSpeedMonitor() {
-        Log.d(TAG, "startSpeedMonitor: Starting speed monitor...");
-        
-        try {
-            speedMonitor = new SpeedMonitor(this);
-            speedMonitor.setSpeedListener((downloadSpeed, uploadSpeed, ping) -> {
-                runOnUiThread(() -> {
-                    try {
-                        if (tvDownloadSpeed != null) {
-                            tvDownloadSpeed.setText(String.format("%.1f", downloadSpeed));
-                        }
-                        if (tvUploadSpeed != null) {
-                            tvUploadSpeed.setText(String.format("%.1f", uploadSpeed));
-                        }
-                        if (tvPing != null) {
-                            tvPing.setText(String.valueOf(ping));
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Speed update error: " + e.getMessage());
-                    }
-                });
-            });
-            speedMonitor.start();
-        } catch (Exception e) {
-            Log.e(TAG, "startSpeedMonitor Error: " + e.getMessage(), e);
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
+
         if (requestCode == VPN_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 startBypass();
@@ -432,27 +421,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, 
-            @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        
+
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            Log.d(TAG, "onRequestPermissionsResult: Permission results received");
+            Log.d(TAG, "Permissions result received");
         }
     }
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy: Activity destroying...");
-        
-        try {
-            if (speedMonitor != null) {
-                speedMonitor.stop();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "onDestroy Error: " + e.getMessage());
+        if (bypassEngine != null) {
+            bypassEngine.stopBypass();
         }
-        
         super.onDestroy();
     }
 }
