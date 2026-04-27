@@ -8,87 +8,24 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
-    <uses-permission android:name="android.permission.NETWORK_STACK" />
-    <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
-    <uses-permission android:name="android.permission.NETWORK_SETUP_WIZARD" />
-    <uses-permission android:name="android.permission.NETWORK_MANAGED_PROVISIONING" />
-    <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
     
     <!-- ========== TELEPHONY PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
-    <uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
-    <uses-permission android:name="android.permission.CALL_PHONE" />
-    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
-    <uses-permission android:name="android.permission.READ_CALL_LOG" />
-    <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
-    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
-    <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
-    
-    <!-- ========== APN AND CARRIER PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
-    <uses-permission android:name="android.permission.MODIFY_CELL_BROADCASTS" />
-    <uses-permission android:name="android.permission.ACCESS_IMS_CALL_SERVICE" />
-    
-    <!-- ========== VPN PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
-    <uses-permission android:name="android.permission.BIND_ALWAYS_ON_VPN_SERVICE" />
     
     <!-- ========== BACKGROUND SERVICE PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
-    <uses-permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    
-    <!-- ========== BOOT AND STARTUP PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.QUICKBOOT_POWERON" />
-    <uses-permission android:name="android.permission.ACTION_BOOT_COMPLETED" />
     
-    <!-- ========== SYSTEM PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-    <uses-permission android:name="android.permission.MANAGE_USERS" />
+    <!-- ========== VPN PERMISSIONS ========== -->
+    <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
     
-    <!-- ========== DNS AND PROXY PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
-    <uses-permission android:name="android.permission.DUMP" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
-    
-    <!-- ========== STORAGE PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    
-    <!-- ========== NOTIFICATION PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
-    
-    <!-- ========== ROOT PERMISSIONS (if available) ========== -->
-    <uses-permission android:name="android.permission.ACCESS_SUPERUSER" tools:ignore="ProtectedPermissions" />
-    
-    <!-- ========== SPECIAL PERMISSIONS ========== -->
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
-    <uses-permission android:name="android.permission.BIND_DEVICE_ADMIN" />
-    
-    <!-- ========== MOBILE DATA SPECIFIC ========== -->
+    <!-- ========== LOCATION PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     
-    <uses-feature android:name="android.hardware.telephony" android:required="false" />
-    <uses-feature android:name="android.hardware.wifi" android:required="false" />
-    <uses-feature android:name="android.hardware.network.gsm" android:required="false" />
-    <uses-feature android:name="android.hardware.network.lte" android:required="false" />
-    <uses-feature android:name="android.hardware.network.nr" android:required="false" />
+    <!-- ========== NOTIFICATION PERMISSIONS ========== -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -98,8 +35,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.UnlimitedDataBypass"
         android:usesCleartextTraffic="true"
-        android:networkSecurityConfig="@xml/network_security_config"
-        android:debuggable="false"
         tools:targetApi="34">
         
         <!-- Main Activity -->
@@ -107,7 +42,6 @@
             android:name=".activities.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:configChanges="orientation|screenSize|keyboardHidden"
             android:theme="@style/Theme.UnlimitedDataBypass">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -115,12 +49,12 @@
             </intent-filter>
         </activity>
         
-        <!-- Bypass Service - Background/Foreground -->
+        <!-- Bypass Service - VPN -->
         <service
             android:name=".services.BypassService"
             android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="dataSync|specialUse"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
             android:permission="android.permission.BIND_VPN_SERVICE">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
@@ -130,20 +64,6 @@
                 android:value="data_optimization" />
         </service>
         
-        <!-- 5G Optimizer Service -->
-        <service
-            android:name=".services.SpeedOptimizerService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-        
-        <!-- DNS Service -->
-        <service
-            android:name=".services.DNSManipulationService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-        
         <!-- Boot Receiver - Auto Start -->
         <receiver
             android:name=".receivers.BootReceiver"
@@ -152,43 +72,9 @@
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
-                <action android:name="android.intent.action.REBOOT" />
-                <action android:name="android.intent.action.ACTION_SHUTDOWN" />
             </intent-filter>
         </receiver>
-        
-        <!-- Network Change Receiver -->
-        <receiver
-            android:name=".receivers.NetworkChangeReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter android:priority="1000">
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-            </intent-filter>
-        </receiver>
-        
-        <!-- Data Limit Reset Receiver -->
-        <receiver
-            android:name=".receivers.DataLimitReceiver"
-            android:enabled="true"
-            android:exported="false" />
-        
-        <!-- Accessibility Service for Deep Integration -->
-        <service
-            android:name=".services.DataAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config" />
-        </service>
-        
+
     </application>
 
 </manifest>

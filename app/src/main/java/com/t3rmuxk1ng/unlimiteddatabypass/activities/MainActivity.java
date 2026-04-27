@@ -1,22 +1,12 @@
 package com.t3rmuxk1ng.unlimiteddatabypass.activities;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,8 +14,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -33,22 +23,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.t3rmuxk1ng.unlimiteddatabypass.R;
 import com.t3rmuxk1ng.unlimiteddatabypass.config.ISPDatabase;
-import com.t3rmuxk1ng.unlimiteddatabypass.engines.APNBypassEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.engines.DNSManipulationEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.engines.HeaderInjectionEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.engines.ProxyBypassEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.engines.SpeedOptimizerEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.engines.TunnelEngine;
 import com.t3rmuxk1ng.unlimiteddatabypass.models.ISPConfig;
-import com.t3rmuxk1ng.unlimiteddatabypass.receivers.BootReceiver;
 import com.t3rmuxk1ng.unlimiteddatabypass.services.BypassService;
-import com.t3rmuxk1ng.unlimiteddatabypass.utils.PermissionHelper;
 import com.t3rmuxk1ng.unlimiteddatabypass.utils.SpeedMonitor;
 
 import java.util.ArrayList;
@@ -62,90 +43,59 @@ import java.util.Random;
  */
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
+    private static final int VPN_REQUEST_CODE = 1001;
+    private static final int PERMISSION_REQUEST_CODE = 1002;
+    private static final String CHANNEL_ID = "bypass_channel";
+
     // UI Components
-    private TextView tvTitle, tvSubtitle, tvStatus, tvISP, tvNetworkType;
+    private TextView tvStatus, tvISP, tvNetworkType;
     private TextView tvDownloadSpeed, tvUploadSpeed, tvPing;
-    private Button btnActivate, btnSelectISP, btnSettings;
-    private CardView statusCard, speedCard, featuresCard;
+    private Button btnActivate, btnSelectISP;
     
     // Feature Switches
     private Switch switchApn, switchDns, switchHeader, switchProxy;
     private Switch switchTunnel, switchVpn, switch5g, switchUnlimited;
     
-    // Engines
-    private APNBypassEngine apnBypassEngine;
-    private DNSManipulationEngine dnsEngine;
-    private HeaderInjectionEngine headerEngine;
-    private ProxyBypassEngine proxyEngine;
-    private TunnelEngine tunnelEngine;
-    private SpeedOptimizerEngine speedOptimizer;
-    
     // State
     private boolean isBypassActive = false;
     private ISPConfig currentISP;
     private SpeedMonitor speedMonitor;
-    
-    // Constants
-    private static final int VPN_REQUEST_CODE = 1001;
-    private static final int PERMISSION_REQUEST_CODE = 1002;
-    private static final String CHANNEL_ID = "bypass_channel";
-    
-    // Permissions Array
-    private final String[] REQUIRED_PERMISSIONS = {
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_NETWORK_STATE,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.CHANGE_NETWORK_STATE,
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.READ_PHONE_STATE,
-        Manifest.permission.WRITE_SETTINGS,
-        Manifest.permission.RECEIVE_BOOT_COMPLETED,
-        Manifest.permission.FOREGROUND_SERVICE,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.POST_NOTIFICATIONS
-    };
-    
-    // Additional permissions for Android 13+
-    private final String[] ANDROID_13_PERMISSIONS = {
-        Manifest.permission.READ_PHONE_NUMBERS
-    };
+    private Random random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
         
-        initViews();
-        initEngines();
-        checkPermissions();
-        setupClickListeners();
-        createNotificationChannel();
-        detectISP();
-        startSpeedMonitor();
-        
-        // Auto-start bypass if configured
-        if (getSharedPreferences("bypass_prefs", MODE_PRIVATE)
-                .getBoolean("auto_start", false)) {
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                activateBypass();
-            }, 1000);
+        try {
+            setContentView(R.layout.activity_main);
+            Log.d(TAG, "onCreate: Activity starting...");
+            
+            random = new Random();
+            initViews();
+            checkPermissions();
+            setupClickListeners();
+            createNotificationChannel();
+            detectISP();
+            startSpeedMonitor();
+            
+            Log.d(TAG, "onCreate: Activity started successfully");
+            
+        } catch (Exception e) {
+            Log.e(TAG, "onCreate Error: " + e.getMessage(), e);
+            Toast.makeText(this, "Error starting app: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void initViews() {
-        // Header
-        tvTitle = findViewById(R.id.tvTitle);
-        tvSubtitle = findViewById(R.id.tvSubtitle);
+        Log.d(TAG, "initViews: Initializing views...");
         
         // Status Card
-        statusCard = findViewById(R.id.statusCard);
         tvStatus = findViewById(R.id.tvStatus);
         tvISP = findViewById(R.id.tvISP);
         tvNetworkType = findViewById(R.id.tvNetworkType);
         
         // Speed Card
-        speedCard = findViewById(R.id.speedCard);
         tvDownloadSpeed = findViewById(R.id.tvDownloadSpeed);
         tvUploadSpeed = findViewById(R.id.tvUploadSpeed);
         tvPing = findViewById(R.id.tvPing);
@@ -163,155 +113,130 @@ public class MainActivity extends AppCompatActivity {
         // Buttons
         btnActivate = findViewById(R.id.btnActivate);
         btnSelectISP = findViewById(R.id.btnSelectISP);
-        btnSettings = findViewById(R.id.btnSettings);
         
-        // Apply animations
-        animateCard(statusCard, 0);
-        animateCard(speedCard, 100);
-        animateCard(featuresCard, 200);
-    }
-    
-    private void animateCard(View view, long delay) {
-        view.setAlpha(0f);
-        view.setTranslationY(50f);
-        view.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(500)
-            .setStartDelay(delay)
-            .setInterpolator(new AccelerateDecelerateInterpolator())
-            .start();
-    }
-
-    private void initEngines() {
-        apnBypassEngine = new APNBypassEngine(this);
-        dnsEngine = new DNSManipulationEngine(this);
-        headerEngine = new HeaderInjectionEngine(this);
-        proxyEngine = new ProxyBypassEngine(this);
-        tunnelEngine = new TunnelEngine(this);
-        speedOptimizer = new SpeedOptimizerEngine(this);
-        speedMonitor = new SpeedMonitor(this);
+        // Set default ISP
+        currentISP = ISPDatabase.getDefaultISP();
+        
+        Log.d(TAG, "initViews: Views initialized");
     }
 
     private void checkPermissions() {
+        Log.d(TAG, "checkPermissions: Checking permissions...");
+        
         List<String> permissionsNeeded = new ArrayList<>();
         
-        for (String permission : REQUIRED_PERMISSIONS) {
+        String[] basicPermissions = {
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        };
+        
+        for (String permission : basicPermissions) {
             if (ContextCompat.checkSelfPermission(this, permission) 
                     != PackageManager.PERMISSION_GRANTED) {
                 permissionsNeeded.add(permission);
             }
         }
         
-        // Add Android 13+ permissions
+        // Add notification permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            for (String permission : ANDROID_13_PERMISSIONS) {
-                if (ContextCompat.checkSelfPermission(this, permission) 
-                        != PackageManager.PERMISSION_GRANTED) {
-                    permissionsNeeded.add(permission);
-                }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
             }
         }
         
         if (!permissionsNeeded.isEmpty()) {
+            Log.d(TAG, "checkPermissions: Requesting " + permissionsNeeded.size() + " permissions");
             ActivityCompat.requestPermissions(this,
                     permissionsNeeded.toArray(new String[0]),
                     PERMISSION_REQUEST_CODE);
-        }
-        
-        // Request system alert window permission
-        if (!Settings.canDrawOverlays(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            startActivity(intent);
-        }
-        
-        // Request write settings permission
-        if (!Settings.System.canWrite(this)) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-            startActivity(intent);
-        }
-        
-        // Request battery optimization exemption
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent intent = new Intent();
-            String packageName = getPackageName();
-            android.os.PowerManager pm = (android.os.PowerManager) 
-                    getSystemService(Context.POWER_SERVICE);
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                intent.setData(android.net.Uri.parse("package:" + packageName));
-                startActivity(intent);
-            }
+        } else {
+            Log.d(TAG, "checkPermissions: All permissions granted");
         }
     }
 
     private void setupClickListeners() {
+        Log.d(TAG, "setupClickListeners: Setting up click listeners...");
+        
         btnActivate.setOnClickListener(v -> {
-            if (isBypassActive) {
-                deactivateBypass();
-            } else {
-                activateBypass();
+            try {
+                if (isBypassActive) {
+                    deactivateBypass();
+                } else {
+                    activateBypass();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Button click error: " + e.getMessage(), e);
+                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         
         btnSelectISP.setOnClickListener(v -> showISPSelector());
         
-        btnSettings.setOnClickListener(v -> showSettings());
-        
-        // Feature switches
-        switchApn.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isBypassActive && isChecked != apnBypassEngine.isActive()) {
-                if (isChecked) apnBypassEngine.start(currentISP);
-                else apnBypassEngine.stop();
-            }
-        });
-        
-        switchDns.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isBypassActive) {
-                if (isChecked) dnsEngine.start(currentISP);
-                else dnsEngine.stop();
-            }
-        });
-        
-        switch5g.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isBypassActive) {
-                if (isChecked) speedOptimizer.enable5GBoost();
-                else speedOptimizer.disable5GBoost();
-            }
-        });
+        Log.d(TAG, "setupClickListeners: Click listeners set up");
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    getString(R.string.notification_channel_name),
-                    NotificationManager.IMPORTANCE_LOW
-            );
-            channel.setDescription(getString(R.string.notification_channel_desc));
-            
-            NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
+            try {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Bypass Status",
+                        NotificationManager.IMPORTANCE_LOW
+                );
+                channel.setDescription("Unlimited Data Bypass Status");
+                
+                NotificationManager manager = getSystemService(NotificationManager.class);
+                if (manager != null) {
+                    manager.createNotificationChannel(channel);
+                    Log.d(TAG, "Notification channel created");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error creating notification channel: " + e.getMessage());
+            }
         }
     }
 
     private void detectISP() {
-        TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) 
-                == PackageManager.PERMISSION_GRANTED) {
-            String operatorName = tm.getNetworkOperatorName();
-            String mccMnc = tm.getNetworkOperator();
-            
-            currentISP = ISPDatabase.detectISP(operatorName, mccMnc);
-            tvISP.setText("ISP: " + currentISP.getName());
-            
-            // Detect network type
-            int networkType = tm.getDataNetworkType();
-            String networkName = getNetworkTypeName(networkType);
-            tvNetworkType.setText("Network: " + networkName);
-        } else {
+        Log.d(TAG, "detectISP: Detecting ISP...");
+        
+        try {
+            TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) 
+                    == PackageManager.PERMISSION_GRANTED) {
+                String operatorName = tm.getNetworkOperatorName();
+                String mccMnc = tm.getNetworkOperator();
+                
+                currentISP = ISPDatabase.detectISP(operatorName, mccMnc);
+                if (tvISP != null) {
+                    tvISP.setText("ISP: " + (currentISP != null ? currentISP.getName() : "Unknown"));
+                }
+                
+                // Detect network type
+                int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                try {
+                    networkType = tm.getDataNetworkType();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error getting network type: " + e.getMessage());
+                }
+                
+                String networkName = getNetworkTypeName(networkType);
+                if (tvNetworkType != null) {
+                    tvNetworkType.setText("Network: " + networkName);
+                }
+            } else {
+                currentISP = ISPDatabase.getDefaultISP();
+                if (tvISP != null) {
+                    tvISP.setText("ISP: " + (currentISP != null ? currentISP.getName() : "Select ISP"));
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "detectISP Error: " + e.getMessage(), e);
             currentISP = ISPDatabase.getDefaultISP();
-            tvISP.setText("ISP: Manual Selection Required");
         }
     }
     
@@ -336,159 +261,173 @@ public class MainActivity extends AppCompatActivity {
             case TelephonyManager.NETWORK_TYPE_LTE:
                 return "4G LTE";
             case TelephonyManager.NETWORK_TYPE_NR:
-                return "5G 🚀";
+                return "5G";
             default:
                 return "Unknown";
         }
     }
 
     private void showISPSelector() {
-        String[] ispNames = ISPDatabase.getAllISPNames();
-        
-        new AlertDialog.Builder(this)
-            .setTitle("Select Your ISP")
-            .setItems(ispNames, (dialog, which) -> {
-                currentISP = ISPDatabase.getISPByIndex(which);
-                tvISP.setText("ISP: " + currentISP.getName());
-                Toast.makeText(this, "Selected: " + currentISP.getName(), 
-                        Toast.LENGTH_SHORT).show();
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
-    }
-
-    private void showSettings() {
-        // Create settings dialog
-        View settingsView = getLayoutInflater().inflate(R.layout.dialog_settings, null);
-        
-        new AlertDialog.Builder(this)
-            .setTitle("⚙️ Settings")
-            .setView(settingsView)
-            .setPositiveButton("Save", (dialog, which) -> {
-                // Save settings
-                saveSettings();
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
-    }
-    
-    private void saveSettings() {
-        getSharedPreferences("bypass_prefs", MODE_PRIVATE)
-            .edit()
-            .putBoolean("auto_start", true)
-            .putBoolean("background_service", true)
-            .putBoolean("notification", true)
-            .apply();
-        
-        Toast.makeText(this, "Settings saved!", Toast.LENGTH_SHORT).show();
+        try {
+            String[] ispNames = ISPDatabase.getAllISPNames();
+            
+            new AlertDialog.Builder(this)
+                .setTitle("Select Your ISP")
+                .setItems(ispNames, (dialog, which) -> {
+                    currentISP = ISPDatabase.getISPByIndex(which);
+                    if (tvISP != null && currentISP != null) {
+                        tvISP.setText("ISP: " + currentISP.getName());
+                    }
+                    Toast.makeText(this, "Selected: " + (currentISP != null ? currentISP.getName() : "Unknown"), 
+                            Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+        } catch (Exception e) {
+            Log.e(TAG, "showISPSelector Error: " + e.getMessage(), e);
+            Toast.makeText(this, "Error showing ISP selector", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void activateBypass() {
+        Log.d(TAG, "activateBypass: Activating bypass...");
+        
         if (currentISP == null) {
             Toast.makeText(this, "Please select ISP first", Toast.LENGTH_SHORT).show();
             return;
         }
         
-        // Request VPN permission
-        Intent vpnIntent = VpnService.prepare(this);
-        if (vpnIntent != null) {
-            startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
-            return;
+        try {
+            // Request VPN permission
+            Intent vpnIntent = VpnService.prepare(this);
+            if (vpnIntent != null) {
+                startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
+                return;
+            }
+            
+            // Start bypass
+            startBypass();
+            
+        } catch (Exception e) {
+            Log.e(TAG, "activateBypass Error: " + e.getMessage(), e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-        
-        // Start bypass
-        startBypass();
     }
     
     private void startBypass() {
+        Log.d(TAG, "startBypass: Starting bypass service...");
+        
         isBypassActive = true;
         updateStatusUI(true);
         
         // Start Bypass Service
-        Intent serviceIntent = new Intent(this, BypassService.class);
-        serviceIntent.putExtra("isp_config", currentISP);
-        serviceIntent.putExtra("apn_bypass", switchApn.isChecked());
-        serviceIntent.putExtra("dns_bypass", switchDns.isChecked());
-        serviceIntent.putExtra("header_bypass", switchHeader.isChecked());
-        serviceIntent.putExtra("proxy_bypass", switchProxy.isChecked());
-        serviceIntent.putExtra("tunnel_bypass", switchTunnel.isChecked());
-        serviceIntent.putExtra("vpn_bypass", switchVpn.isChecked());
-        serviceIntent.putExtra("5g_boost", switch5g.isChecked());
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
+        try {
+            Intent serviceIntent = new Intent(this, BypassService.class);
+            if (currentISP != null) {
+                serviceIntent.putExtra("isp_name", currentISP.getName());
+            }
+            serviceIntent.putExtra("apn_bypass", switchApn != null && switchApn.isChecked());
+            serviceIntent.putExtra("dns_bypass", switchDns != null && switchDns.isChecked());
+            serviceIntent.putExtra("header_bypass", switchHeader != null && switchHeader.isChecked());
+            serviceIntent.putExtra("proxy_bypass", switchProxy != null && switchProxy.isChecked());
+            serviceIntent.putExtra("tunnel_bypass", switchTunnel != null && switchTunnel.isChecked());
+            serviceIntent.putExtra("vpn_bypass", switchVpn != null && switchVpn.isChecked());
+            serviceIntent.putExtra("5g_boost", switch5g != null && switch5g.isChecked());
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+            
+            Log.d(TAG, "startBypass: Service started");
+            Toast.makeText(this, "Bypass Activated!", Toast.LENGTH_LONG).show();
+            
+        } catch (Exception e) {
+            Log.e(TAG, "startBypass Error: " + e.getMessage(), e);
+            Toast.makeText(this, "Error starting service: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            isBypassActive = false;
+            updateStatusUI(false);
         }
-        
-        // Start individual engines
-        if (switchApn.isChecked()) apnBypassEngine.start(currentISP);
-        if (switchDns.isChecked()) dnsEngine.start(currentISP);
-        if (switchHeader.isChecked()) headerEngine.start(currentISP);
-        if (switchProxy.isChecked()) proxyEngine.start(currentISP);
-        if (switchTunnel.isChecked()) tunnelEngine.start(currentISP);
-        if (switch5g.isChecked()) speedOptimizer.enable5GBoost();
-        
-        Toast.makeText(this, getString(R.string.msg_activated), Toast.LENGTH_LONG).show();
     }
 
     private void deactivateBypass() {
+        Log.d(TAG, "deactivateBypass: Deactivating bypass...");
+        
         isBypassActive = false;
         updateStatusUI(false);
         
         // Stop Bypass Service
-        Intent serviceIntent = new Intent(this, BypassService.class);
-        stopService(serviceIntent);
-        
-        // Stop all engines
-        apnBypassEngine.stop();
-        dnsEngine.stop();
-        headerEngine.stop();
-        proxyEngine.stop();
-        tunnelEngine.stop();
-        speedOptimizer.disable5GBoost();
-        
-        Toast.makeText(this, getString(R.string.msg_deactivated), Toast.LENGTH_SHORT).show();
+        try {
+            Intent serviceIntent = new Intent(this, BypassService.class);
+            stopService(serviceIntent);
+            Log.d(TAG, "deactivateBypass: Service stopped");
+            Toast.makeText(this, "Bypass Deactivated", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Log.e(TAG, "deactivateBypass Error: " + e.getMessage(), e);
+        }
     }
 
     private void updateStatusUI(boolean active) {
         runOnUiThread(() -> {
-            if (active) {
-                tvStatus.setText(getString(R.string.status_active));
-                tvStatus.setTextColor(getColor(R.color.status_active));
-                btnActivate.setText(getString(R.string.btn_deactivate));
-                btnActivate.setBackground(getDrawable(R.drawable.button_secondary));
-            } else {
-                tvStatus.setText(getString(R.string.status_inactive));
-                tvStatus.setTextColor(getColor(R.color.status_inactive));
-                btnActivate.setText(getString(R.string.btn_activate));
-                btnActivate.setBackground(getDrawable(R.drawable.button_primary));
+            try {
+                if (tvStatus != null) {
+                    if (active) {
+                        tvStatus.setText("✅ BYPASS ACTIVE");
+                        tvStatus.setTextColor(getColor(R.color.status_active));
+                    } else {
+                        tvStatus.setText("❌ BYPASS INACTIVE");
+                        tvStatus.setTextColor(getColor(R.color.status_inactive));
+                    }
+                }
+                
+                if (btnActivate != null) {
+                    btnActivate.setText(active ? "🛑 DEACTIVATE" : "⚡ ACTIVATE BYPASS");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "updateStatusUI Error: " + e.getMessage());
             }
         });
     }
 
     private void startSpeedMonitor() {
-        speedMonitor.setSpeedListener(new SpeedMonitor.SpeedListener() {
-            @Override
-            public void onSpeedUpdate(double downloadSpeed, double uploadSpeed, int ping) {
+        Log.d(TAG, "startSpeedMonitor: Starting speed monitor...");
+        
+        try {
+            speedMonitor = new SpeedMonitor(this);
+            speedMonitor.setSpeedListener((downloadSpeed, uploadSpeed, ping) -> {
                 runOnUiThread(() -> {
-                    tvDownloadSpeed.setText(String.format("%.1f", downloadSpeed));
-                    tvUploadSpeed.setText(String.format("%.1f", uploadSpeed));
-                    tvPing.setText(String.valueOf(ping));
+                    try {
+                        if (tvDownloadSpeed != null) {
+                            tvDownloadSpeed.setText(String.format("%.1f", downloadSpeed));
+                        }
+                        if (tvUploadSpeed != null) {
+                            tvUploadSpeed.setText(String.format("%.1f", uploadSpeed));
+                        }
+                        if (tvPing != null) {
+                            tvPing.setText(String.valueOf(ping));
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Speed update error: " + e.getMessage());
+                    }
                 });
-            }
-        });
-        speedMonitor.start();
+            });
+            speedMonitor.start();
+        } catch (Exception e) {
+            Log.e(TAG, "startSpeedMonitor Error: " + e.getMessage(), e);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-            startBypass();
-        } else if (requestCode == VPN_REQUEST_CODE) {
-            Toast.makeText(this, "VPN permission denied", Toast.LENGTH_SHORT).show();
+        if (requestCode == VPN_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                startBypass();
+            } else {
+                Toast.makeText(this, "VPN permission denied", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -498,26 +437,22 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         
         if (requestCode == PERMISSION_REQUEST_CODE) {
-            boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-            
-            if (!allGranted) {
-                Toast.makeText(this, "Some permissions denied. App may not work properly.", 
-                        Toast.LENGTH_LONG).show();
-            }
+            Log.d(TAG, "onRequestPermissionsResult: Permission results received");
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        if (speedMonitor != null) {
-            speedMonitor.stop();
+        Log.d(TAG, "onDestroy: Activity destroying...");
+        
+        try {
+            if (speedMonitor != null) {
+                speedMonitor.stop();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy Error: " + e.getMessage());
         }
+        
+        super.onDestroy();
     }
 }
