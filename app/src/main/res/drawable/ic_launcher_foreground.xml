@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#0D1117"
+        android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    
+    <!-- Outer Glow Ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="2"
+        android:pathData="M54,54m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"/>
+    
+    <!-- Lightning Bolt -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M60,20L40,55L52,55L48,88L68,50L56,50L60,20Z"/>
+    
+    <!-- Signal Waves -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M25,70Q35,60 45,70"/>
+    
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#7C4DFF"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:pathData="M63,70Q73,60 83,70"/>
+    
+</vector>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- DNS Servers -->
+    <string-array name="dns_servers">
+        <item>Google DNS (8.8.8.8)</item>
+        <item>Cloudflare DNS (1.1.1.1)</item>
+        <item>OpenDNS (208.67.222.222)</item>
+        <item>Quad9 (9.9.9.9)</item>
+        <item>ISP Default</item>
+    </string-array>
+
+    <!-- Bypass Modes -->
+    <string-array name="bypass_modes">
+        <item>Full Bypass (Recommended)</item>
+        <item>APN Only</item>
+        <item>DNS Only</item>
+        <item>Header Injection Only</item>
+        <item>Proxy Only</item>
+        <item>Tunnel Mode</item>
+        <item>Custom</item>
+    </string-array>
+</resources>

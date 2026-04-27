@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">jio.com</domain>
+        <domain includeSubdomains="true">airtel.in</domain>
+        <domain includeSubdomains="true">vodafoneidea.com</domain>
+        <domain includeSubdomains="true">bsnl.co.in</domain>
+        <domain includeSubdomains="true">tmobile.com</domain>
+        <domain includeSubdomains="true">att.com</domain>
+        <domain includeSubdomains="true">verizon.com</domain>
+        <domain includeSubdomains="true">mtn.com</domain>
+        <domain includeSubdomains="true">globetel.com</domain>
+        <domain includeSubdomains="true">telkomsel.com</domain>
+    </domain-config>
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>

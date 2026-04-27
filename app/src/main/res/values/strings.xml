@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">⚡ Unlimited Data Bypass</string>
+    <string name="app_description">Next-Level 5G Speed &amp; Unlimited Data</string>
+    
+    <!-- Main Screen -->
+    <string name="title_main">🚀 UNLIMITED DATA BYPASS</string>
+    <string name="subtitle_main">GOD TIER EDITION v1.0</string>
+    <string name="btn_activate">⚡ ACTIVATE BYPASS</string>
+    <string name="btn_deactivate">🛑 DEACTIVATE</string>
+    <string name="btn_settings">⚙️ SETTINGS</string>
+    <string name="btn_isp_select">📶 SELECT ISP</string>
+    
+    <!-- Status -->
+    <string name="status_active">✅ BYPASS ACTIVE</string>
+    <string name="status_inactive">❌ BYPASS INACTIVE</string>
+    <string name="status_connecting">🔄 CONNECTING...</string>
+    
+    <!-- Features -->
+    <string name="feature_apn">APN Bypass</string>
+    <string name="feature_dns">DNS Manipulation</string>
+    <string name="feature_header">Header Injection</string>
+    <string name="feature_proxy">Proxy Bypass</string>
+    <string name="feature_tunnel">Tunnel Mode</string>
+    <string name="feature_vpn">VPN Shield</string>
+    <string name="feature_5g">5G Speed Boost</string>
+    <string name="feature_unlimited">Unlimited Data</string>
+    
+    <!-- ISP Names -->
+    <string name="isp_jio">Jio (India)</string>
+    <string name="isp_airtel">Airtel (India)</string>
+    <string name="isp_vi">Vi (India)</string>
+    <string name="isp_bsnl">BSNL (India)</string>
+    <string name="isp_tmobile">T-Mobile (USA)</string>
+    <string name="isp_att">AT&T (USA)</string>
+    <string name="isp_verizon">Verizon (USA)</string>
+    <string name="isp_mtn">MTN (Africa)</string>
+    <string name="isp_globe">Globe (Philippines)</string>
+    <string name="isp_smart">Smart (Philippines)</string>
+    <string name="isp_telkomsel">Telkomsel (Indonesia)</string>
+    <string name="isp_vivo">Vivo (Brazil)</string>
+    
+    <!-- Speed Display -->
+    <string name="speed_title">CURRENT SPEED</string>
+    <string name="speed_download">Download</string>
+    <string name="speed_upload">Upload</string>
+    <string name="speed_ping">Ping</string>
+    
+    <!-- Data Display -->
+    <string name="data_title">DATA USAGE</string>
+    <string name="data_used">Used</string>
+    <string name="data_bypassed">Bypassed</string>
+    <string name="data_saved">Saved</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Bypass Status</string>
+    <string name="notification_channel_desc">Shows bypass status and speed</string>
+    <string name="notification_title">⚡ Bypass Active</string>
+    <string name="notification_content">Unlimited Data Mode Enabled</string>
+    
+    <!-- Settings -->
+    <string name="settings_title">⚙️ SETTINGS</string>
+    <string name="setting_auto_start">Auto Start on Boot</string>
+    <string name="setting_background">Background Service</string>
+    <string name="setting_notification">Show Notification</string>
+    <string name="setting_battery_opt">Battery Optimization</string>
+    <string name="setting_dns_server">DNS Server</string>
+    <string name="setting_proxy_port">Proxy Port</string>
+    <string name="setting_bypass_mode">Bypass Mode</string>
+    
+    <!-- Messages -->
+    <string name="msg_activated">Bypass Activated Successfully!</string>
+    <string name="msg_deactivated">Bypass Deactivated</string>
+    <string name="msg_error">Error: %s</string>
+    <string name="msg_permission_required">Permission Required</string>
+    <string name="msg_vpn_permission">VPN Permission Required</string>
+    
+    <!-- Credits -->
+    <string name="credits">Created by T3rmuxk1ng\nGOD TIER EDITION</string>
+</resources>
