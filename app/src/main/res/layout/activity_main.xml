@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<ScrollView 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background_gradient"
+    android:fillViewport="true"
+    android:background="@drawable/background_gradient">
+
+<androidx.constraintlayout.widget.ConstraintLayout 
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     tools:context=".activities.MainActivity">
 
     <!-- Header Section -->
@@ -25,13 +30,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title_main"
-            android:textSize="28sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/primary"
-            android:shadowColor="@color/glow"
-            android:shadowRadius="10"
-            android:shadowDx="0"
-            android:shadowDy="0" />
+            android:gravity="center" />
 
         <TextView
             android:id="@+id/tvSubtitle"
@@ -69,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/status_inactive"
-                android:textSize="24sp"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 android:textColor="@color/status_inactive" />
 
@@ -142,7 +144,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.0"
-                        android:textSize="28sp"
+                        android:textSize="24sp"
                         android:textStyle="bold"
                         android:textColor="@color/accent_green" />
 
@@ -168,7 +170,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.0"
-                        android:textSize="28sp"
+                        android:textSize="24sp"
                         android:textStyle="bold"
                         android:textColor="@color/accent_cyan" />
 
@@ -194,7 +196,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textSize="28sp"
+                        android:textSize="24sp"
                         android:textStyle="bold"
                         android:textColor="@color/accent_orange" />
 
@@ -235,7 +237,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🚀 FEATURES"
+                android:text="FEATURES"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/primary" />
@@ -266,7 +268,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_apn"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -291,7 +293,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_dns"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -316,7 +318,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_header"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -341,7 +343,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_proxy"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -366,7 +368,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_tunnel"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -391,7 +393,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_vpn"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -416,7 +418,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_5g"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -441,7 +443,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/feature_unlimited"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textColor="@color/text_primary"
                         android:layout_marginStart="8dp" />
 
@@ -460,8 +462,9 @@
         android:layout_height="60dp"
         android:layout_margin="16dp"
         android:text="@string/btn_activate"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="bold"
+        android:textAllCaps="true"
         android:background="@drawable/button_primary"
         app:layout_constraintTop_toBottomOf="@id/featuresCard"
         app:layout_constraintStart_toStartOf="parent"
@@ -511,8 +514,10 @@
         android:textColor="@color/text_disabled"
         android:gravity="center"
         android:layout_margin="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bottomButtons"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

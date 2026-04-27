@@ -17,7 +17,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Switch;
+import androidx.appcompat.widget.SwitchCompat;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private Button btnActivate, btnSelectISP;
     
     // Feature Switches
-    private Switch switchApn, switchDns, switchHeader, switchProxy;
-    private Switch switchTunnel, switchVpn, switch5g, switchUnlimited;
+    private SwitchCompat switchApn, switchDns, switchHeader, switchProxy;
+    private SwitchCompat switchTunnel, switchVpn, switch5g, switchUnlimited;
     
     // State
     private boolean isBypassActive = false;
