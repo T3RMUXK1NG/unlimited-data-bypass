@@ -32,7 +32,7 @@
     <string name="isp_vi">Vi (India)</string>
     <string name="isp_bsnl">BSNL (India)</string>
     <string name="isp_tmobile">T-Mobile (USA)</string>
-    <string name="isp_att">AT&T (USA)</string>
+    <string name="isp_att">AT&amp;T (USA)</string>
     <string name="isp_verizon">Verizon (USA)</string>
     <string name="isp_mtn">MTN (Africa)</string>
     <string name="isp_globe">Globe (Philippines)</string>
