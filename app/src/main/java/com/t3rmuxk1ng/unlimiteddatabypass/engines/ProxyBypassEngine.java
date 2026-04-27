@@ -24,7 +24,7 @@ public class ProxyBypassEngine {
             new ProxyServer("165.225.38.68", 10605, "HTTP"),
             new ProxyServer("185.162.228.219", 80, "HTTP"),
             new ProxyServer("159.89.195.232", 3128, "HTTP"),
-            new ProxyServer("68.183.48.146, 8080", "HTTP")
+            new ProxyServer("68.183.48.146", 8080, "HTTP")
     };
 
     private Context context;

@@ -105,7 +105,6 @@ public class APNBypassEngine {
         values.put(Telephony.Carriers.PROTOCOL, "IPV4V6");
         values.put(Telephony.Carriers.ROAMING_PROTOCOL, "IPV4V6");
         values.put(Telephony.Carriers.CARRIER_ENABLED, 1);
-        values.put(Telephony.Carriers.BEARER_BITMASK, 0);
         values.put(Telephony.Carriers.MVNO_TYPE, "");
         values.put(Telephony.Carriers.MVNO_MATCH_DATA, "");
 

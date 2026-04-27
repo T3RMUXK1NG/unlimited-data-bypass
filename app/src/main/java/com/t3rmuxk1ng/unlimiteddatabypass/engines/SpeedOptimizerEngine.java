@@ -96,7 +96,6 @@ public class SpeedOptimizerEngine {
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
                     .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                    .setBandwidth(100000) // Request 100Mbps
                     .build();
 
             try {
