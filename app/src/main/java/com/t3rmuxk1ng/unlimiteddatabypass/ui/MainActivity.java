@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.net.VpnService;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,8 +19,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.t3rmuxk1ng.unlimiteddatabypass.R;
-import com.t3rmuxk1ng.unlimiteddatabypass.core.BypassEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.vpn.BypassVpnService;
+import com.t3rmuxk1ng.unlimiteddatabypass.advanced.LiveLogManager;
+import com.t3rmuxk1ng.unlimiteddatabypass.vpn.IntegratedVpnService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,21 +31,23 @@ import java.util.Locale;
 /**
  * MAIN ACTIVITY
  * Terminal-style UI with live logging
+ * Now uses IntegratedVpnService for REAL bypass
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LiveLogManager.LogListener {
 
     private static final int VPN_REQUEST = 1001;
     private static final int PERM_REQUEST = 1002;
 
-    private TextView tvStatus, tvSpeed, tvLog;
+    private TextView tvStatus, tvSpeed, tvLog, tvStats;
     private Button btnActivate;
     private ScrollView scrollView;
-    
+
     private boolean isActive = false;
-    private BypassEngine engine;
     private Handler handler = new Handler(Looper.getMainLooper());
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
     private StringBuilder logBuilder = new StringBuilder();
+
+    private LiveLogManager logManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         initViews();
         checkPermissions();
-        initEngine();
+        initLogManager();
     }
 
     private void initViews() {
@@ -64,6 +65,9 @@ public class MainActivity extends AppCompatActivity {
         tvLog = findViewById(R.id.tvLog);
         btnActivate = findViewById(R.id.btnActivate);
         scrollView = findViewById(R.id.scrollView);
+
+        // Stats TextView - may not exist in layout
+        tvStats = findViewById(R.id.tvStats);
 
         btnActivate.setOnClickListener(v -> {
             if (isActive) {
@@ -78,13 +82,20 @@ public class MainActivity extends AppCompatActivity {
             tvLog.setText("");
         });
 
-        log("🔥 JIO BYPASS v2.0");
         log("═══════════════════════════════════");
+        log("🔥 JIO UNLIMITED BYPASS v3.0");
+        log("🔥 REAL VPN INTEGRATION");
+        log("═══════════════════════════════════");
+        log("");
+        log("📡 ISP: Jio India (MP Circle)");
+        log("🎯 Target: Bypass 2GB/day limit");
+        log("🔧 Method: VPN Tunnel + SNI Spoof");
+        log("");
     }
 
     private void checkPermissions() {
         List<String> needed = new ArrayList<>();
-        
+
         String[] perms = {
             Manifest.permission.INTERNET,
             Manifest.permission.ACCESS_NETWORK_STATE,
@@ -103,49 +114,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initEngine() {
-        engine = new BypassEngine(this);
-        engine.setCallback(new BypassEngine.BypassCallback() {
-            @Override
-            public void onStatus(String status) {
-                handler.post(() -> tvStatus.setText(status));
-            }
+    private void initLogManager() {
+        logManager = LiveLogManager.getInstance();
+        logManager.setListener(this);
 
-            @Override
-            public void onSpeed(double down, double up, int ping) {
-                handler.post(() -> {
-                    String speed = String.format("↓ %.1f Mbps  ↑ %.1f Mbps  %d ms", down, up, ping);
-                    tvSpeed.setText(speed);
-                    log("⚡ " + speed);
-                });
-            }
+        // Check if VPN is already running
+        if (IntegratedVpnService.isRunning()) {
+            isActive = true;
+            updateUI();
+            log("✅ VPN already running");
+        }
+    }
 
-            @Override
-            public void onData(long bytes) {
-                double mb = bytes / (1024.0 * 1024.0);
-                // Could update data counter
-            }
-
-            @Override
-            public void onMethod(String method) {
-                log("✅ Method: " + method);
-            }
-
-            @Override
-            public void onLog(String l) {
-                log(l);
-            }
-
-            @Override
-            public void onError(String e) {
-                log("❌ " + e);
-            }
-        });
+    @Override
+    public void onLogMessage(String message) {
+        log(message);
     }
 
     private void startBypass() {
         log("═══════════════════════════════════");
-        log("🔥 ACTIVATING...");
+        log("🔥 ACTIVATING REAL VPN BYPASS...");
         log("═══════════════════════════════════");
 
         // Request VPN permission
@@ -162,57 +150,79 @@ public class MainActivity extends AppCompatActivity {
         isActive = true;
         updateUI();
 
-        // Start VPN service
-        Intent service = new Intent(this, BypassVpnService.class);
-        service.setAction(BypassVpnService.ACTION_START);
-        startService(service);
+        // Start INTEGRATED VPN service (real bypass)
+        Intent service = new Intent(this, IntegratedVpnService.class);
+        service.setAction(IntegratedVpnService.ACTION_START);
 
-        // Start bypass engine
-        engine.start();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(service);
+        } else {
+            startService(service);
+        }
 
-        log("✅ VPN Service started");
+        log("✅ Integrated VPN Service started");
+        log("⏳ Initializing tunnel...");
+
+        // Start stats updater
+        startStatsUpdater();
     }
 
     private void stopBypass() {
-        log("🛑 Stopping...");
+        log("🛑 Stopping VPN...");
 
         isActive = false;
         updateUI();
 
         // Stop VPN service
-        Intent service = new Intent(this, BypassVpnService.class);
-        service.setAction(BypassVpnService.ACTION_STOP);
+        Intent service = new Intent(this, IntegratedVpnService.class);
+        service.setAction(IntegratedVpnService.ACTION_STOP);
         startService(service);
 
-        // Stop engine
-        engine.stop();
-
-        log("❌ STOPPED");
+        log("❌ VPN STOPPED");
     }
 
     private void updateUI() {
         if (isActive) {
-            tvStatus.setText("✅ ACTIVE");
+            tvStatus.setText("🔥 ACTIVE");
             tvStatus.setTextColor(Color.parseColor("#00FF00"));
-            btnActivate.setText("🛑 STOP");
+            btnActivate.setText("🛑 STOP BYPASS");
+            btnActivate.setBackgroundColor(Color.parseColor("#FF4444"));
         } else {
             tvStatus.setText("❌ INACTIVE");
             tvStatus.setTextColor(Color.parseColor("#FF0000"));
-            btnActivate.setText("🔥 ACTIVATE");
+            btnActivate.setText("🔥 ACTIVATE BYPASS");
+            btnActivate.setBackgroundColor(Color.parseColor("#4CAF50"));
         }
+    }
+
+    private void startStatsUpdater() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isActive) {
+                    IntegratedVpnService vpn = IntegratedVpnService.getInstance();
+                    if (vpn != null && tvStats != null) {
+                        tvStats.setText(vpn.getStats());
+                    }
+
+                    // Update every 3 seconds
+                    handler.postDelayed(this, 3000);
+                }
+            }
+        }, 1000);
     }
 
     private void log(String msg) {
         String time = timeFormat.format(new Date());
         String line = "[" + time + "] " + msg + "\n";
-        
+
         logBuilder.append(line);
-        
+
         // Limit log size
-        if (logBuilder.length() > 20000) {
-            logBuilder = new StringBuilder(logBuilder.substring(logBuilder.length() - 15000));
+        if (logBuilder.length() > 30000) {
+            logBuilder = new StringBuilder(logBuilder.substring(logBuilder.length() - 20000));
         }
-        
+
         handler.post(() -> {
             tvLog.setText(logBuilder.toString());
             scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
@@ -222,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
+
         if (requestCode == VPN_REQUEST) {
             if (resultCode == RESULT_OK) {
                 log("✅ VPN Permission granted");
@@ -236,9 +246,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (engine != null) {
-            engine.stop();
+        if (logManager != null) {
+            logManager.removeListener();
         }
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Check VPN status
+        if (IntegratedVpnService.isRunning() && !isActive) {
+            isActive = true;
+            updateUI();
+            startStatsUpdater();
+        }
     }
 }

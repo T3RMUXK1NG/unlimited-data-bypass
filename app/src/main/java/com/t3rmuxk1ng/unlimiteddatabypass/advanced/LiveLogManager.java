@@ -25,16 +25,22 @@ public class LiveLogManager {
 
     private static final String TAG = "LiveLog";
     private static LiveLogManager instance;
-    
+
+    // Listener interface for external log handling
+    public interface LogListener {
+        void onLogMessage(String message);
+    }
+
     private TextView logTextView;
     private ScrollView scrollView;
     private Context context;
     private ExecutorService executor;
     private Handler mainHandler;
     private SimpleDateFormat timeFormat;
-    
+
     private List<String> logBuffer = new ArrayList<>();
     private static final int MAX_LINES = 500;
+    private LogListener listener;
     
     // Log colors
     public static final String COLOR_INFO = "#00E5FF";     // Cyan
@@ -68,21 +74,29 @@ public class LiveLogManager {
         log("📡 Initializing bypass engine...", "INFO");
     }
 
+    public void setListener(LogListener listener) {
+        this.listener = listener;
+    }
+
+    public void removeListener() {
+        this.listener = null;
+    }
+
     public void log(String message, String type) {
         executor.execute(() -> {
             String timestamp = timeFormat.format(new Date());
             String color = getColorForType(type);
             String prefix = getPrefixForType(type);
-            
+
             String logLine = String.format("[%s] %s %s", timestamp, prefix, message);
-            
+
             logBuffer.add(logLine);
-            
+
             // Limit buffer
             if (logBuffer.size() > MAX_LINES) {
                 logBuffer.remove(0);
             }
-            
+
             // Update UI
             mainHandler.post(() -> {
                 if (logTextView != null) {
@@ -91,14 +105,19 @@ public class LiveLogManager {
                         sb.append(line).append("\n");
                     }
                     logTextView.setText(sb.toString());
-                    
+
                     // Auto scroll
                     if (scrollView != null) {
                         scrollView.post(() -> scrollView.fullScroll(ScrollView.FOCUS_DOWN));
                     }
                 }
+
+                // Notify listener
+                if (listener != null) {
+                    listener.onLogMessage(logLine);
+                }
             });
-            
+
             // Also log to Android
             Log.d(TAG, prefix + " " + message);
         });

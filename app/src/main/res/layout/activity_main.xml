@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout 
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="#0D1117"
-    tools:context=".activities.MainActivity">
+    tools:context=".ui.MainActivity">
 
     <!-- Header -->
     <LinearLayout
@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔥 JIO GOD MODE v2.0"
+            android:text="🔥 JIO UNLIMITED BYPASS v3.0"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#00E5FF" />
@@ -35,6 +35,15 @@
             android:textStyle="bold"
             android:textColor="#FF0000"
             android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="11sp"
+            android:textColor="#B0BEC5"
+            android:layout_marginTop="2dp" />
 
     </LinearLayout>
 
@@ -162,7 +171,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="📟 LIVE TERMINAL"
+            android:text="📟 LIVE TERMINAL - REAL VPN BYPASS"
             android:textSize="11sp"
             android:textStyle="bold"
             android:textColor="#00E5FF"
@@ -170,7 +179,7 @@
             android:background="#161B22" />
 
         <ScrollView
-            android:id="@+id/logScrollView"
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#010409"
@@ -204,7 +213,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="APN " android:textSize="10sp" android:textColor="#B0BEC5" />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -212,7 +221,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="DNS " android:textSize="10sp" android:textColor="#B0BEC5" />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -220,7 +229,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Host " android:textSize="10sp" android:textColor="#B0BEC5" />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -228,7 +237,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="Tunnel " android:textSize="10sp" android:textColor="#B0BEC5" />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -236,7 +245,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" 
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="5G" android:textSize="10sp" android:textColor="#B0BEC5" />
 
     </LinearLayout>
@@ -247,7 +256,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_margin="8dp"
-        android:text="🔥 ACTIVATE GOD MODE"
+        android:text="🔥 ACTIVATE BYPASS"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textAllCaps="true"
@@ -260,25 +269,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="4dp"
-        android:weightSum="3">
+        android:weightSum="2">
 
         <Button
-            android:id="@+id/btnSelectISP"
+            android:id="@+id/btnClear"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
             android:layout_marginEnd="4dp"
-            android:text="⚡ PAYLOAD"
-            android:textSize="11sp"
-            android:background="@drawable/button_secondary"
-            android:textColor="#00E5FF" />
-
-        <Button
-            android:id="@+id/btnClearLog"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:text="🗑️ CLEAR"
+            android:text="🗑️ CLEAR LOG"
             android:textSize="11sp"
             android:background="@drawable/button_secondary"
             android:textColor="#00E5FF" />

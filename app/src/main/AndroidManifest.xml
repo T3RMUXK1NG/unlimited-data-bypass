@@ -8,22 +8,22 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    
+
     <!-- ========== TELEPHONY PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    
+
     <!-- ========== BACKGROUND SERVICE PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    
+
     <!-- ========== VPN PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.BIND_VPN_SERVICE" />
-    
+
     <!-- ========== LOCATION PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    
+
     <!-- ========== NOTIFICATION PERMISSIONS ========== -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
@@ -39,10 +39,10 @@
         android:hardwareAccelerated="true"
         android:largeHeap="true"
         tools:targetApi="34">
-        
+
         <!-- Main Activity -->
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.UnlimitedDataBypass">
@@ -51,8 +51,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <!-- Bypass Service - VPN -->
+
+        <!-- Integrated VPN Service - REAL BYPASS -->
+        <service
+            android:name=".vpn.IntegratedVpnService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="vpn_tunnel" />
+        </service>
+
+        <!-- Legacy Bypass Service -->
         <service
             android:name=".services.BypassService"
             android:enabled="true"
@@ -66,7 +81,7 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="data_optimization" />
         </service>
-        
+
         <!-- Boot Receiver - Auto Start -->
         <receiver
             android:name=".receivers.BootReceiver"
