@@ -6,58 +6,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@drawable/background_gradient">
+    android:background="#0D1117">
 
-<androidx.constraintlayout.widget.ConstraintLayout 
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".activities.MainActivity">
 
-    <!-- Header Section -->
+    <!-- Header -->
     <LinearLayout
-        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
-        android:padding="24dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:padding="20dp">
 
         <TextView
-            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/title_main"
-            android:textSize="24sp"
+            android:text="🔥 JIO GOD MODE"
+            android:textSize="28sp"
             android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:gravity="center" />
+            android:textColor="#00E5FF" />
 
         <TextView
-            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/subtitle_main"
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
+            android:text="UNLIMITED DATA BYPASS v2.0"
+            android:textSize="12sp"
+            android:textColor="#7C4DFF"
             android:layout_marginTop="4dp" />
 
     </LinearLayout>
 
     <!-- Status Card -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/statusCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@id/headerLayout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#1E2530"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -70,27 +61,27 @@
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/status_inactive"
+                android:text="❌ GOD MODE INACTIVE"
                 android:textSize="22sp"
                 android:textStyle="bold"
-                android:textColor="@color/status_inactive" />
+                android:textColor="#FF0000" />
 
             <TextView
                 android:id="@+id/tvISP"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="ISP: Not Detected"
+                android:text="ISP: Jio (MP, India)"
                 android:textSize="14sp"
-                android:textColor="@color/text_secondary"
+                android:textColor="#B0BEC5"
                 android:layout_marginTop="8dp" />
 
             <TextView
                 android:id="@+id/tvNetworkType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Network: --"
+                android:text="Network: 4G/5G"
                 android:textSize="14sp"
-                android:textColor="@color/text_secondary"
+                android:textColor="#B0BEC5"
                 android:layout_marginTop="4dp" />
 
         </LinearLayout>
@@ -99,16 +90,12 @@
 
     <!-- Speed Card -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/speedCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@id/statusCard"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#1E2530"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -119,19 +106,19 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/speed_title"
-                android:textSize="16sp"
+                android:text="📊 CURRENT SPEED"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="@color/primary" />
+                android:textColor="#00E5FF" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:weightSum="3">
 
-                <!-- Download Speed -->
+                <!-- Download -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -144,20 +131,20 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.0"
-                        android:textSize="24sp"
+                        android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="@color/accent_green" />
+                        android:textColor="#00FF00" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Mbps ↓"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textSize="11sp"
+                        android:textColor="#B0BEC5" />
 
                 </LinearLayout>
 
-                <!-- Upload Speed -->
+                <!-- Upload -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -170,16 +157,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0.0"
-                        android:textSize="24sp"
+                        android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="@color/accent_cyan" />
+                        android:textColor="#00FFFF" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Mbps ↑"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textSize="11sp"
+                        android:textColor="#B0BEC5" />
 
                 </LinearLayout>
 
@@ -196,16 +183,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textSize="24sp"
+                        android:textSize="28sp"
                         android:textStyle="bold"
-                        android:textColor="@color/accent_orange" />
+                        android:textColor="#FF6B00" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="ms Ping"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_secondary" />
+                        android:textSize="11sp"
+                        android:textColor="#B0BEC5" />
 
                 </LinearLayout>
 
@@ -215,18 +202,14 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- Features Grid -->
+    <!-- Features Card -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/featuresCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@id/speedCard"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="#1E2530"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -237,10 +220,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FEATURES"
-                android:textSize="16sp"
+                android:text="⚡ BYPASS FEATURES"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="@color/primary" />
+                android:textColor="#00E5FF" />
 
             <GridLayout
                 android:layout_width="match_parent"
@@ -249,7 +232,7 @@
                 android:columnCount="2"
                 android:rowCount="4">
 
-                <!-- APN Bypass -->
+                <!-- Feature toggles -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -267,14 +250,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_apn"
+                        android:text="APN Bypass"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- DNS Manipulation -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -292,14 +274,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_dns"
+                        android:text="DNS Bypass"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- Header Injection -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -317,14 +298,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_header"
+                        android:text="Host Header"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- Proxy Bypass -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -342,14 +322,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_proxy"
+                        android:text="Proxy"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- Tunnel Mode -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -367,14 +346,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_tunnel"
+                        android:text="Tunnel"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- VPN Shield -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -392,14 +370,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_vpn"
+                        android:text="VPN Shield"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- 5G Speed Boost -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -417,14 +394,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_5g"
+                        android:text="5G Boost"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
 
-                <!-- Unlimited Data -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -442,9 +418,9 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/feature_unlimited"
+                        android:text="Unlimited"
                         android:textSize="12sp"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#FFFFFF"
                         android:layout_marginStart="8dp" />
 
                 </LinearLayout>
@@ -455,32 +431,25 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- Main Action Button -->
+    <!-- ACTIVATE BUTTON -->
     <Button
         android:id="@+id/btnActivate"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:layout_margin="16dp"
-        android:text="@string/btn_activate"
+        android:layout_marginBottom="12dp"
+        android:text="🔥 ACTIVATE GOD MODE"
         android:textSize="16sp"
         android:textStyle="bold"
         android:textAllCaps="true"
         android:background="@drawable/button_primary"
-        app:layout_constraintTop_toBottomOf="@id/featuresCard"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:textColor="#FFFFFF" />
 
     <!-- Bottom Buttons -->
     <LinearLayout
-        android:id="@+id/bottomButtons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="16dp"
-        android:weightSum="2"
-        app:layout_constraintTop_toBottomOf="@id/btnActivate"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:weightSum="2">
 
         <Button
             android:id="@+id/btnSelectISP"
@@ -488,9 +457,9 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
-            android:text="@string/btn_isp_select"
+            android:text="⚡ PAYLOAD"
             android:background="@drawable/button_secondary"
-            android:textColor="@color/primary" />
+            android:textColor="#00E5FF" />
 
         <Button
             android:id="@+id/btnSettings"
@@ -498,26 +467,22 @@
             android:layout_height="50dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="@string/btn_settings"
+            android:text="⚙️ SETTINGS"
             android:background="@drawable/button_secondary"
-            android:textColor="@color/primary" />
+            android:textColor="#00E5FF" />
 
     </LinearLayout>
 
     <!-- Credits -->
     <TextView
-        android:id="@+id/tvCredits"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/credits"
+        android:text="Created by T3rmuxk1ng\nJio GOD MODE v2.0"
         android:textSize="10sp"
-        android:textColor="@color/text_disabled"
+        android:textColor="#546E7A"
         android:gravity="center"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/bottomButtons"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginTop="20dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
 
 </ScrollView>

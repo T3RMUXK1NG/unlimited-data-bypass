@@ -7,16 +7,20 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,17 +31,20 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.t3rmuxk1ng.unlimiteddatabypass.R;
-import com.t3rmuxk1ng.unlimiteddatabypass.core.ISPPayload;
-import com.t3rmuxk1ng.unlimiteddatabypass.core.RealBypassEngine;
+import com.t3rmuxk1ng.unlimiteddatabypass.advanced.JioGodModeEngine;
+import com.t3rmuxk1ng.unlimiteddatabypass.advanced.JioPayloadGenerator;
 import com.t3rmuxk1ng.unlimiteddatabypass.services.BypassService;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Random;
+import java.util.Locale;
 
 /**
- * MAIN ACTIVITY - REAL BYPASS EDITION
- * Actually works with real payload injection
+ * MAIN ACTIVITY - GOD MODE EDITION
+ * Jio MP India - Unlimited Data Bypass
+ * Created by T3rmuxk1ng
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -49,7 +56,10 @@ public class MainActivity extends AppCompatActivity {
     // UI Components
     private TextView tvStatus, tvISP, tvNetworkType;
     private TextView tvDownloadSpeed, tvUploadSpeed, tvPing;
-    private Button btnActivate, btnSelectISP;
+    private TextView tvBypassed, tvUptime, tvMethod;
+    private Button btnActivate;
+    private LinearLayout logContainer;
+    private ScrollView logScrollView;
 
     // Feature Switches
     private SwitchCompat switchApn, switchDns, switchHeader, switchProxy;
@@ -57,8 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
     // State
     private boolean isBypassActive = false;
-    private ISPPayload currentPayload;
-    private RealBypassEngine bypassEngine;
+    private JioGodModeEngine godModeEngine;
+    private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,37 +76,34 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             setContentView(R.layout.activity_main);
-            Log.d(TAG, "onCreate: Starting...");
+            Log.d(TAG, "GOD MODE Starting...");
 
             initViews();
             checkPermissions();
             setupClickListeners();
             createNotificationChannel();
-            initBypassEngine();
+            initGodModeEngine();
             detectISP();
 
-            Log.d(TAG, "onCreate: Ready!");
+            Log.d(TAG, "GOD MODE Ready!");
 
         } catch (Exception e) {
-            Log.e(TAG, "onCreate Error: " + e.getMessage(), e);
+            Log.e(TAG, "Error: " + e.getMessage(), e);
             Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     private void initViews() {
-        Log.d(TAG, "initViews: Initializing...");
-
-        // Status Card
         tvStatus = findViewById(R.id.tvStatus);
         tvISP = findViewById(R.id.tvISP);
         tvNetworkType = findViewById(R.id.tvNetworkType);
 
-        // Speed Card
         tvDownloadSpeed = findViewById(R.id.tvDownloadSpeed);
         tvUploadSpeed = findViewById(R.id.tvUploadSpeed);
         tvPing = findViewById(R.id.tvPing);
 
-        // Feature Switches
+        btnActivate = findViewById(R.id.btnActivate);
+
         switchApn = findViewById(R.id.switchApn);
         switchDns = findViewById(R.id.switchDns);
         switchHeader = findViewById(R.id.switchHeader);
@@ -106,56 +113,66 @@ public class MainActivity extends AppCompatActivity {
         switch5g = findViewById(R.id.switch5g);
         switchUnlimited = findViewById(R.id.switchUnlimited);
 
-        // Buttons
-        btnActivate = findViewById(R.id.btnActivate);
-        btnSelectISP = findViewById(R.id.btnSelectISP);
-
-        // Default payload
-        currentPayload = ISPPayload.getAllPayloads()[0];
-
-        Log.d(TAG, "initViews: Done");
+        // Set Jio as default
+        tvISP.setText("ISP: Jio (MP, India)");
     }
 
-    private void initBypassEngine() {
-        bypassEngine = new RealBypassEngine(this);
-        bypassEngine.setCallback(new RealBypassEngine.BypassCallback() {
+    private void initGodModeEngine() {
+        godModeEngine = new JioGodModeEngine(this);
+        godModeEngine.setCallback(new JioGodModeEngine.GodModeCallback() {
             @Override
             public void onStatusUpdate(String status) {
-                runOnUiThread(() -> {
+                uiHandler.post(() -> {
                     if (tvStatus != null) tvStatus.setText(status);
                 });
             }
 
             @Override
             public void onSpeedUpdate(double download, double upload, int ping) {
-                runOnUiThread(() -> {
-                    if (tvDownloadSpeed != null) tvDownloadSpeed.setText(String.format("%.1f", download));
-                    if (tvUploadSpeed != null) tvUploadSpeed.setText(String.format("%.1f", upload));
-                    if (tvPing != null) tvPing.setText(String.valueOf(ping));
+                uiHandler.post(() -> {
+                    if (tvDownloadSpeed != null)
+                        tvDownloadSpeed.setText(String.format("%.1f", download));
+                    if (tvUploadSpeed != null)
+                        tvUploadSpeed.setText(String.format("%.1f", upload));
+                    if (tvPing != null)
+                        tvPing.setText(String.valueOf(ping));
+                });
+            }
+
+            @Override
+            public void onDataBypassed(long bytes) {
+                uiHandler.post(() -> {
+                    double mb = bytes / (1024.0 * 1024.0);
+                    double gb = mb / 1024.0;
+                    // Could display bypassed data
                 });
             }
 
             @Override
             public void onError(String error) {
-                runOnUiThread(() -> {
+                uiHandler.post(() -> {
                     Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
                 });
             }
 
             @Override
-            public void onConnected() {
-                runOnUiThread(() -> {
+            public void onConnected(String method) {
+                uiHandler.post(() -> {
                     isBypassActive = true;
                     updateStatusUI(true);
-                    Toast.makeText(MainActivity.this, "✅ Bypass Connected!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, 
+                        "✅ Connected via " + method, Toast.LENGTH_LONG).show();
                 });
+            }
+
+            @Override
+            public void onLog(String log) {
+                Log.d(TAG, log);
             }
         });
     }
 
     private void checkPermissions() {
-        Log.d(TAG, "checkPermissions: Checking...");
-
         List<String> permissionsNeeded = new ArrayList<>();
 
         String[] basicPermissions = {
@@ -191,23 +208,23 @@ public class MainActivity extends AppCompatActivity {
     private void setupClickListeners() {
         btnActivate.setOnClickListener(v -> {
             if (isBypassActive) {
-                deactivateBypass();
+                deactivateGodMode();
             } else {
-                activateBypass();
+                activateGodMode();
             }
         });
 
-        btnSelectISP.setOnClickListener(v -> showISPSelector());
+        findViewById(R.id.btnSelectISP).setOnClickListener(v -> showPayloadSelector());
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
-                    "Bypass Status",
+                    "GOD MODE Bypass",
                     NotificationManager.IMPORTANCE_LOW
             );
-            channel.setDescription("Unlimited Data Bypass Status");
+            channel.setDescription("Unlimited Data Bypass Active");
 
             NotificationManager manager = getSystemService(NotificationManager.class);
             if (manager != null) {
@@ -217,138 +234,78 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void detectISP() {
-        Log.d(TAG, "detectISP: Detecting...");
-
         try {
             TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             if (tm != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                     == PackageManager.PERMISSION_GRANTED) {
+                
                 String operatorName = tm.getNetworkOperatorName();
-                String mccMnc = tm.getNetworkOperator();
-
-                Log.d(TAG, "Operator: " + operatorName + ", MCC/MNC: " + mccMnc);
-
-                // Detect ISP from operator name
-                String detectedISP = detectISPFromName(operatorName);
-                currentPayload = ISPPayload.getByName(detectedISP);
-
-                if (tvISP != null) {
-                    tvISP.setText("ISP: " + currentPayload.getName());
+                int networkType = tm.getDataNetworkType();
+                
+                if (operatorName.toLowerCase().contains("jio")) {
+                    tvISP.setText("ISP: Jio (MP, India)");
                 }
-
-                // Network type
-                int networkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                try {
-                    networkType = tm.getDataNetworkType();
-                } catch (Exception e) {
-                    Log.e(TAG, "Network type error: " + e.getMessage());
-                }
-
-                String networkName = getNetworkTypeName(networkType);
-                if (tvNetworkType != null) {
-                    tvNetworkType.setText("Network: " + networkName);
-                }
-            } else {
-                if (tvISP != null) {
-                    tvISP.setText("ISP: " + currentPayload.getName());
-                }
+                
+                tvNetworkType.setText("Network: " + getNetworkTypeName(networkType));
             }
         } catch (Exception e) {
-            Log.e(TAG, "detectISP Error: " + e.getMessage(), e);
+            Log.e(TAG, "ISP detect error: " + e.getMessage());
         }
-    }
-
-    private String detectISPFromName(String operatorName) {
-        if (operatorName == null) return "Auto Detect";
-
-        String op = operatorName.toLowerCase();
-
-        if (op.contains("jio") || op.contains("reliance")) return "Jio (India)";
-        if (op.contains("airtel")) return "Airtel (India)";
-        if (op.contains("vodafone") || op.contains("idea") || op.contains("vi")) return "Vi (India)";
-        if (op.contains("bsnl")) return "BSNL (India)";
-        if (op.contains("t-mobile") || op.contains("tmobile")) return "T-Mobile (USA)";
-        if (op.contains("att") || op.contains("at&t")) return "AT&T (USA)";
-        if (op.contains("mtn")) return "MTN (Africa)";
-        if (op.contains("globe")) return "Globe (Philippines)";
-        if (op.contains("jazz") || op.contains("mobilink")) return "Jazz (Pakistan)";
-
-        return "Auto Detect";
     }
 
     private String getNetworkTypeName(int networkType) {
         switch (networkType) {
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-            case TelephonyManager.NETWORK_TYPE_CDMA:
-            case TelephonyManager.NETWORK_TYPE_1xRTT:
-            case TelephonyManager.NETWORK_TYPE_IDEN:
-                return "2G";
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-            case TelephonyManager.NETWORK_TYPE_EVDO_0:
-            case TelephonyManager.NETWORK_TYPE_EVDO_A:
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-            case TelephonyManager.NETWORK_TYPE_EVDO_B:
-            case TelephonyManager.NETWORK_TYPE_EHRPD:
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-                return "3G/4G";
             case TelephonyManager.NETWORK_TYPE_LTE:
                 return "4G LTE";
             case TelephonyManager.NETWORK_TYPE_NR:
                 return "5G";
             default:
-                return "Unknown";
+                return "4G/5G";
         }
     }
 
-    private void showISPSelector() {
-        String[] ispNames = ISPPayload.getAllNames();
+    private void showPayloadSelector() {
+        String[] payloads = {
+            "🔥 Host Header Injection",
+            "⚡ SNI Spoofing",
+            "🔀 X-Online-Host",
+            "🚇 WebSocket Tunnel",
+            "🌐 Direct IP Bypass",
+            "🎯 Auto (Recommended)"
+        };
 
         new AlertDialog.Builder(this)
-                .setTitle("Select Your ISP")
-                .setItems(ispNames, (dialog, which) -> {
-                    ISPPayload[] payloads = ISPPayload.getAllPayloads();
-                    currentPayload = payloads[which];
-                    if (tvISP != null) {
-                        tvISP.setText("ISP: " + currentPayload.getName());
-                    }
-                    Toast.makeText(this, "Selected: " + currentPayload.getName(), Toast.LENGTH_SHORT).show();
+                .setTitle("⚡ Select Bypass Method")
+                .setItems(payloads, (dialog, which) -> {
+                    Toast.makeText(this, "Selected: " + payloads[which], Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void activateBypass() {
-        Log.d(TAG, "activateBypass: Activating...");
+    private void activateGodMode() {
+        Log.d(TAG, "Activating GOD MODE...");
 
-        if (currentPayload == null) {
-            Toast.makeText(this, "Please select ISP first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Start VPN service
+        // Request VPN permission
         Intent vpnIntent = VpnService.prepare(this);
         if (vpnIntent != null) {
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
             return;
         }
 
-        startBypass();
+        startGodMode();
     }
 
-    private void startBypass() {
-        Log.d(TAG, "startBypass: Starting...");
-
+    private void startGodMode() {
         isBypassActive = true;
         updateStatusUI(true);
-        tvStatus.setText("🔄 Connecting...");
+        tvStatus.setText("🔥 ACTIVATING...");
 
         // Start foreground service
         try {
             Intent serviceIntent = new Intent(this, BypassService.class);
-            serviceIntent.putExtra("isp_name", currentPayload.getName());
+            serviceIntent.putExtra("isp_name", "Jio");
+            serviceIntent.putExtra("god_mode", true);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(serviceIntent);
@@ -356,17 +313,17 @@ public class MainActivity extends AppCompatActivity {
                 startService(serviceIntent);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Service start error: " + e.getMessage());
+            Log.e(TAG, "Service error: " + e.getMessage());
         }
 
-        // Start real bypass engine
-        bypassEngine.startBypass(currentPayload);
+        // Activate GOD MODE
+        godModeEngine.activateGodMode();
 
-        Toast.makeText(this, "⚡ Activating Bypass...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "🔥 GOD MODE ACTIVATING...", Toast.LENGTH_SHORT).show();
     }
 
-    private void deactivateBypass() {
-        Log.d(TAG, "deactivateBypass: Deactivating...");
+    private void deactivateGodMode() {
+        Log.d(TAG, "Deactivating GOD MODE...");
 
         isBypassActive = false;
         updateStatusUI(false);
@@ -379,10 +336,10 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Service stop error: " + e.getMessage());
         }
 
-        // Stop bypass engine
-        bypassEngine.stopBypass();
+        // Stop GOD MODE
+        godModeEngine.deactivate();
 
-        Toast.makeText(this, "Bypass Deactivated", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "GOD MODE Stopped", Toast.LENGTH_SHORT).show();
     }
 
     private void updateStatusUI(boolean active) {
@@ -390,19 +347,19 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if (tvStatus != null) {
                     if (active) {
-                        tvStatus.setText("✅ BYPASS ACTIVE");
+                        tvStatus.setText("✅ GOD MODE ACTIVE");
                         tvStatus.setTextColor(getColor(R.color.status_active));
                     } else {
-                        tvStatus.setText("❌ BYPASS INACTIVE");
+                        tvStatus.setText("❌ GOD MODE INACTIVE");
                         tvStatus.setTextColor(getColor(R.color.status_inactive));
                     }
                 }
 
                 if (btnActivate != null) {
-                    btnActivate.setText(active ? "🛑 DEACTIVATE" : "⚡ ACTIVATE BYPASS");
+                    btnActivate.setText(active ? "🛑 DEACTIVATE" : "🔥 ACTIVATE GOD MODE");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "updateStatusUI Error: " + e.getMessage());
+                Log.e(TAG, "UI update error: " + e.getMessage());
             }
         });
     }
@@ -413,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == VPN_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                startBypass();
+                startGodMode();
             } else {
                 Toast.makeText(this, "VPN permission denied", Toast.LENGTH_SHORT).show();
             }
@@ -424,16 +381,12 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            Log.d(TAG, "Permissions result received");
-        }
     }
 
     @Override
     protected void onDestroy() {
-        if (bypassEngine != null) {
-            bypassEngine.stopBypass();
+        if (godModeEngine != null) {
+            godModeEngine.deactivate();
         }
         super.onDestroy();
     }
