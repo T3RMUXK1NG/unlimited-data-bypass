@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,16 +14,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
@@ -32,19 +26,15 @@ import androidx.core.content.ContextCompat;
 
 import com.t3rmuxk1ng.unlimiteddatabypass.R;
 import com.t3rmuxk1ng.unlimiteddatabypass.advanced.JioGodModeEngine;
-import com.t3rmuxk1ng.unlimiteddatabypass.advanced.JioPayloadGenerator;
+import com.t3rmuxk1ng.unlimiteddatabypass.advanced.LiveLogManager;
 import com.t3rmuxk1ng.unlimiteddatabypass.services.BypassService;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 /**
- * MAIN ACTIVITY - GOD MODE EDITION
- * Jio MP India - Unlimited Data Bypass
- * Created by T3rmuxk1ng
+ * MAIN ACTIVITY - GOD MODE v2.0
+ * Live Terminal Logging
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -53,68 +43,51 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CODE = 1002;
     private static final String CHANNEL_ID = "bypass_channel";
 
-    // UI Components
+    // UI
     private TextView tvStatus, tvISP, tvNetworkType;
     private TextView tvDownloadSpeed, tvUploadSpeed, tvPing;
-    private TextView tvBypassed, tvUptime, tvMethod;
-    private Button btnActivate;
-    private LinearLayout logContainer;
+    private TextView tvLog;
     private ScrollView logScrollView;
-
-    // Feature Switches
-    private SwitchCompat switchApn, switchDns, switchHeader, switchProxy;
-    private SwitchCompat switchTunnel, switchVpn, switch5g, switchUnlimited;
+    private Button btnActivate;
 
     // State
     private boolean isBypassActive = false;
     private JioGodModeEngine godModeEngine;
+    private LiveLogManager logManager;
     private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        try {
-            setContentView(R.layout.activity_main);
-            Log.d(TAG, "GOD MODE Starting...");
+        initViews();
+        initLogManager();
+        checkPermissions();
+        setupClickListeners();
+        createNotificationChannel();
+        initGodModeEngine();
+        detectISP();
 
-            initViews();
-            checkPermissions();
-            setupClickListeners();
-            createNotificationChannel();
-            initGodModeEngine();
-            detectISP();
-
-            Log.d(TAG, "GOD MODE Ready!");
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error: " + e.getMessage(), e);
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        logManager.info("📱 App initialized successfully");
+        logManager.info("🎯 Target: Jio MP, India");
     }
 
     private void initViews() {
         tvStatus = findViewById(R.id.tvStatus);
         tvISP = findViewById(R.id.tvISP);
         tvNetworkType = findViewById(R.id.tvNetworkType);
-
         tvDownloadSpeed = findViewById(R.id.tvDownloadSpeed);
         tvUploadSpeed = findViewById(R.id.tvUploadSpeed);
         tvPing = findViewById(R.id.tvPing);
-
+        tvLog = findViewById(R.id.tvLog);
+        logScrollView = findViewById(R.id.logScrollView);
         btnActivate = findViewById(R.id.btnActivate);
+    }
 
-        switchApn = findViewById(R.id.switchApn);
-        switchDns = findViewById(R.id.switchDns);
-        switchHeader = findViewById(R.id.switchHeader);
-        switchProxy = findViewById(R.id.switchProxy);
-        switchTunnel = findViewById(R.id.switchTunnel);
-        switchVpn = findViewById(R.id.switchVpn);
-        switch5g = findViewById(R.id.switch5g);
-        switchUnlimited = findViewById(R.id.switchUnlimited);
-
-        // Set Jio as default
-        tvISP.setText("ISP: Jio (MP, India)");
+    private void initLogManager() {
+        logManager = LiveLogManager.getInstance();
+        logManager.init(this, tvLog, logScrollView);
     }
 
     private void initGodModeEngine() {
@@ -124,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             public void onStatusUpdate(String status) {
                 uiHandler.post(() -> {
                     if (tvStatus != null) tvStatus.setText(status);
+                    logManager.info("📡 " + status);
                 });
             }
 
@@ -136,21 +110,21 @@ public class MainActivity extends AppCompatActivity {
                         tvUploadSpeed.setText(String.format("%.1f", upload));
                     if (tvPing != null)
                         tvPing.setText(String.valueOf(ping));
+                    
+                    logManager.logSpeedUpdate(download, upload, ping);
                 });
             }
 
             @Override
             public void onDataBypassed(long bytes) {
-                uiHandler.post(() -> {
-                    double mb = bytes / (1024.0 * 1024.0);
-                    double gb = mb / 1024.0;
-                    // Could display bypassed data
-                });
+                double mb = bytes / (1024.0 * 1024.0);
+                logManager.data(String.format("📊 Data bypassed: %.2f MB", mb));
             }
 
             @Override
             public void onError(String error) {
                 uiHandler.post(() -> {
+                    logManager.error("❌ " + error);
                     Toast.makeText(MainActivity.this, error, Toast.LENGTH_SHORT).show();
                 });
             }
@@ -160,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
                 uiHandler.post(() -> {
                     isBypassActive = true;
                     updateStatusUI(true);
+                    logManager.success("🎉 CONNECTED via " + method);
+                    logManager.success("🔥 GOD MODE ACTIVE!");
                     Toast.makeText(MainActivity.this, 
                         "✅ Connected via " + method, Toast.LENGTH_LONG).show();
                 });
@@ -167,12 +143,14 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLog(String log) {
-                Log.d(TAG, log);
+                logManager.debug(log);
             }
         });
     }
 
     private void checkPermissions() {
+        logManager.info("🔐 Checking permissions...");
+        
         List<String> permissionsNeeded = new ArrayList<>();
 
         String[] basicPermissions = {
@@ -199,9 +177,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!permissionsNeeded.isEmpty()) {
+            logManager.warning("⚠️ Requesting " + permissionsNeeded.size() + " permissions");
             ActivityCompat.requestPermissions(this,
                     permissionsNeeded.toArray(new String[0]),
                     PERMISSION_REQUEST_CODE);
+        } else {
+            logManager.success("✓ All permissions granted");
         }
     }
 
@@ -215,21 +196,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.btnSelectISP).setOnClickListener(v -> showPayloadSelector());
+        
+        findViewById(R.id.btnClearLog).setOnClickListener(v -> {
+            logManager.clear();
+            logManager.info("🗑️ Log cleared");
+        });
     }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "GOD MODE Bypass",
-                    NotificationManager.IMPORTANCE_LOW
+                    CHANNEL_ID, "GOD MODE", NotificationManager.IMPORTANCE_LOW
             );
-            channel.setDescription("Unlimited Data Bypass Active");
-
+            channel.setDescription("Unlimited Data Bypass");
             NotificationManager manager = getSystemService(NotificationManager.class);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-            }
+            if (manager != null) manager.createNotificationChannel(channel);
         }
     }
 
@@ -242,25 +223,26 @@ public class MainActivity extends AppCompatActivity {
                 String operatorName = tm.getNetworkOperatorName();
                 int networkType = tm.getDataNetworkType();
                 
+                logManager.info("📱 Network: " + operatorName);
+                logManager.info("📶 Type: " + getNetworkTypeName(networkType));
+                
                 if (operatorName.toLowerCase().contains("jio")) {
-                    tvISP.setText("ISP: Jio (MP, India)");
+                    tvISP.setText("Jio");
+                    logManager.success("✓ Jio detected!");
                 }
                 
-                tvNetworkType.setText("Network: " + getNetworkTypeName(networkType));
+                tvNetworkType.setText(getNetworkTypeName(networkType));
             }
         } catch (Exception e) {
-            Log.e(TAG, "ISP detect error: " + e.getMessage());
+            logManager.error("ISP detect failed: " + e.getMessage());
         }
     }
 
     private String getNetworkTypeName(int networkType) {
         switch (networkType) {
-            case TelephonyManager.NETWORK_TYPE_LTE:
-                return "4G LTE";
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return "5G";
-            default:
-                return "4G/5G";
+            case TelephonyManager.NETWORK_TYPE_LTE: return "4G";
+            case TelephonyManager.NETWORK_TYPE_NR: return "5G";
+            default: return "4G/5G";
         }
     }
 
@@ -277,29 +259,36 @@ public class MainActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("⚡ Select Bypass Method")
                 .setItems(payloads, (dialog, which) -> {
-                    Toast.makeText(this, "Selected: " + payloads[which], Toast.LENGTH_SHORT).show();
+                    logManager.info("📋 Selected: " + payloads[which]);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
 
     private void activateGodMode() {
-        Log.d(TAG, "Activating GOD MODE...");
+        logManager.info("═══════════════════════════════════");
+        logManager.info("🔥 ACTIVATING GOD MODE...");
+        logManager.info("═══════════════════════════════════");
 
         // Request VPN permission
         Intent vpnIntent = VpnService.prepare(this);
         if (vpnIntent != null) {
+            logManager.info("🔐 Requesting VPN permission...");
             startActivityForResult(vpnIntent, VPN_REQUEST_CODE);
             return;
         }
 
+        logManager.success("✓ VPN permission granted");
         startGodMode();
     }
 
     private void startGodMode() {
         isBypassActive = true;
         updateStatusUI(true);
-        tvStatus.setText("🔥 ACTIVATING...");
+        tvStatus.setText("🔥 CONNECTING...");
+
+        logManager.info("🚀 Starting bypass service...");
+        logManager.info("📡 Initializing network tunnel...");
 
         // Start foreground service
         try {
@@ -312,54 +301,47 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 startService(serviceIntent);
             }
+            logManager.success("✓ Service started");
         } catch (Exception e) {
-            Log.e(TAG, "Service error: " + e.getMessage());
+            logManager.error("Service error: " + e.getMessage());
         }
 
         // Activate GOD MODE
         godModeEngine.activateGodMode();
-
-        Toast.makeText(this, "🔥 GOD MODE ACTIVATING...", Toast.LENGTH_SHORT).show();
     }
 
     private void deactivateGodMode() {
-        Log.d(TAG, "Deactivating GOD MODE...");
+        logManager.info("🛑 Stopping GOD MODE...");
 
         isBypassActive = false;
         updateStatusUI(false);
 
-        // Stop service
         try {
             Intent serviceIntent = new Intent(this, BypassService.class);
             stopService(serviceIntent);
+            logManager.success("✓ Service stopped");
         } catch (Exception e) {
-            Log.e(TAG, "Service stop error: " + e.getMessage());
+            logManager.error("Service stop error: " + e.getMessage());
         }
 
-        // Stop GOD MODE
         godModeEngine.deactivate();
-
-        Toast.makeText(this, "GOD MODE Stopped", Toast.LENGTH_SHORT).show();
+        logManager.info("❌ GOD MODE DEACTIVATED");
     }
 
     private void updateStatusUI(boolean active) {
         runOnUiThread(() -> {
-            try {
-                if (tvStatus != null) {
-                    if (active) {
-                        tvStatus.setText("✅ GOD MODE ACTIVE");
-                        tvStatus.setTextColor(getColor(R.color.status_active));
-                    } else {
-                        tvStatus.setText("❌ GOD MODE INACTIVE");
-                        tvStatus.setTextColor(getColor(R.color.status_inactive));
-                    }
+            if (tvStatus != null) {
+                if (active) {
+                    tvStatus.setText("✅ ACTIVE");
+                    tvStatus.setTextColor(getColor(R.color.status_active));
+                } else {
+                    tvStatus.setText("❌ INACTIVE");
+                    tvStatus.setTextColor(getColor(R.color.status_inactive));
                 }
+            }
 
-                if (btnActivate != null) {
-                    btnActivate.setText(active ? "🛑 DEACTIVATE" : "🔥 ACTIVATE GOD MODE");
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "UI update error: " + e.getMessage());
+            if (btnActivate != null) {
+                btnActivate.setText(active ? "🛑 DEACTIVATE" : "🔥 ACTIVATE");
             }
         });
     }
@@ -370,24 +352,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == VPN_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                logManager.success("✓ VPN permission granted");
                 startGodMode();
             } else {
-                Toast.makeText(this, "VPN permission denied", Toast.LENGTH_SHORT).show();
+                logManager.error("❌ VPN permission denied");
+                Toast.makeText(this, "VPN permission required!", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
     protected void onDestroy() {
-        if (godModeEngine != null) {
-            godModeEngine.deactivate();
-        }
+        if (godModeEngine != null) godModeEngine.deactivate();
         super.onDestroy();
     }
 }
