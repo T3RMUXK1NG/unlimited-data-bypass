@@ -2,7 +2,7 @@
 
 [![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.java.com/)
 [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com/)
-[![VPN](https://img.shields.io/badge/VPN-Integrated-blue?style=for-the-badge)](https://github.com/rajsaraswati-jatavv/unlimited-data-bypass)
+[![VPN](https://img.shields.io/badge/VPN-Integrated-blue?style=for-the-badge)](https://github.com/T3RMUXK1NG/unlimited-data-bypass)
 [![GOD TIER](https://img.shields.io/badge/Edition-GOD%20TIER-red?style=for-the-badge)](https://youtube.com/@T3rmuxk1ng)
 
 > GOD TIER EDITION — Integrated VPN with real packet routing, SNI spoofing, and multi-phase bypass engine. Built by [T3rmuxk1ng](https://youtube.com/@T3rmuxk1ng).
@@ -98,13 +98,13 @@ unlimited-data-bypass/
 ## 📦 Installation
 
 ### Download APK
-Download the latest APK from the [Releases](https://github.com/rajsaraswati-jatavv/unlimited-data-bypass/releases) section.
+Download the latest APK from the [Releases](https://github.com/T3RMUXK1NG/unlimited-data-bypass/releases) section.
 
 ### Build from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/rajsaraswati-jatavv/unlimited-data-bypass.git
+git clone https://github.com/T3RMUXK1NG/unlimited-data-bypass.git
 cd unlimited-data-bypass
 
 # Build debug APK
@@ -153,10 +153,10 @@ care.jio.com
 
 ## 👤 Author
 
-**Rajsaraswati Jatav (T3rmuxk1ng)**
+**T3RMUXK1NG (T3rmuxk1ng)**
 
 - YouTube: [https://youtube.com/@T3rmuxk1ng](https://youtube.com/@T3rmuxk1ng)
-- GitHub: [rajsaraswati-jatavv](https://github.com/rajsaraswati-jatavv)
+- GitHub: [T3RMUXK1NG](https://github.com/T3RMUXK1NG)
 
 ---
 
@@ -176,6 +176,6 @@ This project is licensed under the MIT License.
 
 **If you found this project useful, give it a star!**
 
-[YouTube](https://youtube.com/@T3rmuxk1ng) | [GitHub](https://github.com/rajsaraswati-jatavv)
+[YouTube](https://youtube.com/@T3rmuxk1ng) | [GitHub](https://github.com/T3RMUXK1NG)
 
 </div>
